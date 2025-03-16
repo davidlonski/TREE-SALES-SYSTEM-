@@ -10,17 +10,17 @@ import event.Event;
 import userinterface.MainStageContainer;
 import userinterface.WindowPosition;
 
-import model.System;
+import model.TreeLotCoordinator;
 
 
-public class TSS extends Application {
+public class TLC extends Application {
 
-    private System mySystem;
+    private TreeLotCoordinator myTreeLotCoordinator;
 
     private Stage mainStage;
 
     public void start(Stage primaryStage) {
-        java.lang.System.out.println("Tree Scout Version 1.0");
+        java.lang.System.out.println("Tree Lot Coordinator Version 1.0");
         java.lang.System.out.println("Copyright 2004/2015 CSC429-Group");
 
         // Create the top-level container (main frame) and add contents to it.
@@ -38,12 +38,12 @@ public class TSS extends Application {
 
         try
         {
-            mySystem = new System();
+            myTreeLotCoordinator = new TreeLotCoordinator();
         }
         catch(Exception exc)
         {
-            java.lang.System.err.println("TSS.TSS - could not create System!");
-            new Event(Event.getLeafLevelClassName(this), "TSS.<init>", "Unable to create System object", Event.ERROR);
+            java.lang.System.err.println("TLC.TLC - could not create System!");
+            new Event(Event.getLeafLevelClassName(this), "TLC.<init>", "Unable to create TreeLotCoordinator object", Event.ERROR);
             exc.printStackTrace();
         }
 

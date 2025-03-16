@@ -1,28 +1,16 @@
 package model;
 
 // system imports
-import java.util.Hashtable;
-import java.util.Properties;
-
-import javafx.stage.Stage;
-import javafx.scene.Scene;
 
 // project imports
 import impresario.IModel;
 import impresario.IView;
-import impresario.ModelRegistry;
-
-import event.Event;
-import userinterface.MainStageContainer;
-import userinterface.View;
-import userinterface.ViewFactory;
-import userinterface.WindowPosition;
 
 
-public class System implements IView, IModel {
+public class TreeLotCoordinator implements IView, IModel {
 
 
-    public System() {}
+    public TreeLotCoordinator() {}
 
 
     @Override
