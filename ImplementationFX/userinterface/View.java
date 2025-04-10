@@ -24,6 +24,7 @@ import impresario.IView;
 import impresario.IModel;
 import impresario.IControl;
 import impresario.ControlRegistry;
+import javafx.scene.Scene;
 
 //==============================================================
 public abstract class View extends Group
@@ -67,7 +68,8 @@ public abstract class View extends Group
 	{
 		myRegistry.unSubscribe(key, subscriber);
 	}
-	
-   	
+
+
+    public abstract Scene createScene();
 }
 
