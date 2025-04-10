@@ -3,8 +3,6 @@ package model;
 import database.*;
 import exception.*;
 import impresario.*;
-import common.*;
-import event.*;
 import java.util.Properties;
 import java.util.Vector;
 
@@ -28,26 +26,13 @@ public class ScoutCollection extends EntityBase implements IView, impresario.IMo
         }
     }
 
-    public void findScoutsWithNameLike(String name) {
+    public void findScoutsWithLastNameLike(String lastName) {
         scouts = new Vector<>();
-        String query = "SELECT * FROM " + myTableName + " WHERE name LIKE '%" + name + "%'";
-
-        Vector<Properties> allDataRetrieved = getSelectQueryResult(query);
-        if (allDataRetrieved != null) {
-            for (Properties scoutData : allDataRetrieved) {
-                scouts.add(new Scout(scoutData));
-            }
-        }
-    }
-
-    public void findScoutsWithStatus(String status) {
-        scouts = new Vector<>();
-        String query = "SELECT * FROM " + myTableName + " WHERE status = '" + status + "'";
-
-        Vector<Properties> allDataRetrieved = getSelectQueryResult(query);
-        if (allDataRetrieved != null) {
-            for (Properties scoutData : allDataRetrieved) {
-                scouts.add(new Scout(scoutData));
+        String query = "SELECT * FROM " + myTableName + " WHERE LastName LIKE '%" + lastName + "%' ORDER BY FirstName ASC";
+        Vector<Properties> results = getSelectQueryResult(query);
+        if (results != null) {
+            for (Properties props : results) {
+                scouts.add(new Scout(props));
             }
         }
     }
