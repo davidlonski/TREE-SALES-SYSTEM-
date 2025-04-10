@@ -49,7 +49,8 @@ public class ScoutCollectionView extends View {
 
             tableOfScouts.getItems().clear();
             for (Scout scout : entryList) {
-                ScoutTableModel row = new ScoutTableModel(scout.getEntryListView());
+                Vector<String> scoutData = scout.getEntryListView();  // Get data from Scout
+                ScoutTableModel row = new ScoutTableModel(scoutData);  // Pass the vector to the model
                 tableData.add(row);
             }
 
@@ -58,6 +59,7 @@ public class ScoutCollectionView extends View {
             displayErrorMessage("Error fetching scout list: " + e.getMessage());
         }
     }
+
 
     private Node createTitle() {
         Text titleText = new Text(" Scout Collection ");
