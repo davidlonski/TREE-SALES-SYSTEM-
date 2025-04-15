@@ -8,7 +8,7 @@ import javafx.stage.Stage;
 
 import java.util.Properties;
 
-public class AddTreeView extends VBox {
+public class AddTreeView extends View {
 
     private TextField typeField;
     private TextField ageField;
@@ -50,7 +50,7 @@ public class AddTreeView extends VBox {
                 buttonBox
         );
 
-        statusLog = new MessageView();
+        statusLog = new MessageView("");
         getChildren().add(statusLog);
 
         submitButton.setOnAction(e -> processAction());

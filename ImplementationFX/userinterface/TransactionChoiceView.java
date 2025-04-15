@@ -34,9 +34,6 @@ public class TransactionChoiceView extends View {
     private Button removeScoutTransactionButton;
     private Button addTreeTransactionButton;
 
-
-
-
     private Button closeTransactionButton;
 
 

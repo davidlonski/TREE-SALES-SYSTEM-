@@ -5,7 +5,7 @@ import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import java.util.Properties;
 
-public class ModifyScoutView extends VBox {
+public class ModifyScoutView extends View {
 
     private TextField firstNameField;
     private TextField lastNameField;
@@ -58,7 +58,7 @@ public class ModifyScoutView extends VBox {
                 buttonBox
         );
 
-        statusLog = new MessageView();
+        statusLog = new MessageView("");
         getChildren().add(statusLog);
 
         submitButton.setOnAction(e -> processSubmission());
