@@ -1,10 +1,15 @@
 package userinterface;
 
+import model.*;
 import javafx.geometry.Insets;
+import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
-import javafx.stage.Stage;
+import javafx.scene.text.Font;
+import javafx.scene.text.FontWeight;
+import javafx.scene.text.Text;
+import impresario.IModel;
 
 import java.util.Properties;
 
@@ -18,18 +23,33 @@ public class AddTreeView extends View {
     private Button cancelButton;
     private MessageView statusLog;
 
-    public AddTreeView() {
-        setPadding(new Insets(20));
-        setSpacing(10);
+    public AddTreeView(IModel model) {
+        super(model, "AddTreeView");
 
-        Label titleLabel = new Label("Add New Tree");
-        titleLabel.setStyle("-fx-font-size: 20px; -fx-font-weight: bold;");
+        VBox container = new VBox(10);
+        container.setPadding(new Insets(20));
+        container.getChildren().addAll(createTitle(), createFormContent(), createStatusLog(""));
+
+        getChildren().add(container);
+    }
+
+    // -----------------------------
+    private Node createTitle() {
+        Text titleText = new Text(" Add New Tree ");
+        titleText.setFont(Font.font("Arial", FontWeight.BOLD, 20));
+        return titleText;
+    }
+
+    // -----------------------------
+    private Node createFormContent() {
+        VBox formBox = new VBox(10);
+        formBox.setPadding(new Insets(10));
 
         typeField = new TextField();
         typeField.setPromptText("Tree Type");
 
         barcodeField = new TextField();
-        barcodeField.setPromptText("BarcodePrefix");
+        barcodeField.setPromptText("Barcode Prefix");
 
         statusField = new TextField();
         statusField.setPromptText("Status");
@@ -40,23 +60,30 @@ public class AddTreeView extends View {
         submitButton = new Button("Submit");
         cancelButton = new Button("Cancel");
 
-        HBox buttonBox = new HBox(10, submitButton, cancelButton);
+        submitButton.setOnAction(e -> processAction());
+        cancelButton.setOnAction(e -> clearForm());
 
-        getChildren().addAll(titleLabel,
+        HBox buttonBox = new HBox(10, submitButton, cancelButton);
+        buttonBox.setPadding(new Insets(10, 0, 0, 0));
+
+        formBox.getChildren().addAll(
                 new Label("Type:"), typeField,
-                new Label("BarcodePrefix:"), barcodeField,
+                new Label("Barcode Prefix:"), barcodeField,
                 new Label("Status:"), statusField,
                 new Label("Date Status:"), datestatusField,
                 buttonBox
         );
 
-        statusLog = new MessageView("");
-        getChildren().add(statusLog);
-
-        submitButton.setOnAction(e -> processAction());
-        cancelButton.setOnAction(e -> clearForm());
+        return formBox;
     }
 
+    // -----------------------------
+    protected MessageView createStatusLog(String initialMessage) {
+        statusLog = new MessageView(initialMessage);
+        return statusLog;
+    }
+
+    // -----------------------------
     private void processAction() {
         String type = typeField.getText().trim();
         String barcode = barcodeField.getText().trim();
@@ -68,24 +95,41 @@ public class AddTreeView extends View {
             return;
         }
 
-        // Add validation logic here if needed (e.g., numeric check for age/height)
-
         Properties treeProps = new Properties();
-        treeProps.setProperty("type", type);
-        treeProps.setProperty("barcodeprefix", barcode);
-        treeProps.setProperty("status", status);
-        treeProps.setProperty("datestatus", dateStatus);
+        treeProps.setProperty("Type", type);
+        treeProps.setProperty("BarcodePrefix", barcode);
+        treeProps.setProperty("Status", status);
+        treeProps.setProperty("DateStatus", dateStatus);
 
-        // Send to controller
-        // Example: TreeController.processNewTree(treeProps);
+        myModel.stateChangeRequest("AddTree", treeProps);
         statusLog.displayMessage("Tree submitted successfully!");
     }
 
+    // -----------------------------
     private void clearForm() {
         typeField.clear();
         barcodeField.clear();
         statusField.clear();
         datestatusField.clear();
         statusLog.clearErrorMessage();
+    }
+
+    // -----------------------------
+    @Override
+    public void updateState(String key, Object value) {
+        if (key.equals("TransactionStatusMessage")) {
+            String msg = (String) value;
+            if (msg.toLowerCase().startsWith("error")) {
+                statusLog.displayErrorMessage(msg);
+            } else {
+                statusLog.displayMessage(msg);
+            }
+        }
+    }
+
+    // -----------------------------
+    @Override
+    public Scene createScene() {
+        return new Scene(this, 600, 400);
     }
 }
