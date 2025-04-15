@@ -12,8 +12,6 @@ import java.util.Properties;
 public class AddTreeView extends VBox {
 
     private TextField typeField;
-    private TextField ageField;
-    private TextField heightField;
     private TextField barcodeField;
     private TextField statusField;
     private TextField datestatusField;
@@ -31,12 +29,6 @@ public class AddTreeView extends VBox {
         typeField = new TextField();
         typeField.setPromptText("Tree Type");
 
-        ageField = new TextField();
-        ageField.setPromptText("Tree Age");
-
-        heightField = new TextField();
-        heightField.setPromptText("Tree Height (in meters)");
-
         barcodeField = new TextField();
         barcodeField.setPromptText("BarcodePrefix");
 
@@ -53,8 +45,6 @@ public class AddTreeView extends VBox {
 
         getChildren().addAll(titleLabel,
                 new Label("Type:"), typeField,
-                new Label("Age:"), ageField,
-                new Label("Height:"), heightField,
                 new Label("BarcodePrefix:"), barcodeField,
                 new Label("Status:"), statusField,
                 new Label("Date Status:"), datestatusField,
@@ -70,13 +60,11 @@ public class AddTreeView extends VBox {
 
     private void processAction() {
         String type = typeField.getText().trim();
-        String age = ageField.getText().trim();
-        String height = heightField.getText().trim();
         String barcode = barcodeField.getText().trim();
         String status = statusField.getText().trim();
         String dateStatus = datestatusField.getText().trim();
 
-        if (type.isEmpty() || age.isEmpty() || height.isEmpty() || barcode.isEmpty() || status.isEmpty() || dateStatus.isEmpty()) {
+        if (type.isEmpty() || barcode.isEmpty() || status.isEmpty() || dateStatus.isEmpty()) {
             statusLog.displayErrorMessage("Please fill in all fields.");
             return;
         }
@@ -85,8 +73,6 @@ public class AddTreeView extends VBox {
 
         Properties treeProps = new Properties();
         treeProps.setProperty("type", type);
-        treeProps.setProperty("age", age);
-        treeProps.setProperty("height", height);
         treeProps.setProperty("barcodeprefix", barcode);
         treeProps.setProperty("status", status);
         treeProps.setProperty("datestatus", dateStatus);
@@ -98,8 +84,6 @@ public class AddTreeView extends VBox {
 
     private void clearForm() {
         typeField.clear();
-        ageField.clear();
-        heightField.clear();
         barcodeField.clear();
         statusField.clear();
         datestatusField.clear();
