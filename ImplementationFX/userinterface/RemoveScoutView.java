@@ -5,7 +5,7 @@ import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import java.util.Properties;
 
-public class RemoveScoutView extends VBox {
+public class RemoveScoutView extends View {
 
     private Label scoutInfoLabel;
     private Button confirmButton;
@@ -34,7 +34,7 @@ public class RemoveScoutView extends VBox {
 
         HBox buttonBox = new HBox(10, confirmButton, cancelButton);
 
-        statusLog = new MessageView();
+        statusLog = new MessageView("");
 
         getChildren().addAll(
                 titleLabel,
