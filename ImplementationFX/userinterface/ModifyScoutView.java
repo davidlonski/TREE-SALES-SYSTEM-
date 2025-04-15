@@ -3,6 +3,8 @@ package userinterface;
 import javafx.geometry.Insets;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
+
+import java.awt.*;
 import java.util.Properties;
 
 public class ModifyScoutView extends VBox {
@@ -15,6 +17,7 @@ public class ModifyScoutView extends VBox {
     private TextField emailField;
     private TextField troopIDField;
     private TextField statusField;
+    private TextField datestatusField;
 
     private Button submitButton;
     private Button cancelButton;
@@ -39,6 +42,7 @@ public class ModifyScoutView extends VBox {
         emailField = new TextField(scoutProps.getProperty("email", ""));
         troopIDField = new TextField(scoutProps.getProperty("troopID", ""));
         statusField = new TextField(scoutProps.getProperty("status", ""));
+        datestatusField = new TextField(scoutProps.getProperty("datestatus", ""));
 
         submitButton = new Button("Submit Changes");
         cancelButton = new Button("Cancel");
@@ -55,6 +59,7 @@ public class ModifyScoutView extends VBox {
                 new Label("Email:"), emailField,
                 new Label("Troop ID:"), troopIDField,
                 new Label("Status:"), statusField,
+                new Label("Date Status:"), datestatusField,
                 buttonBox
         );
 
@@ -75,6 +80,8 @@ public class ModifyScoutView extends VBox {
         updatedProps.setProperty("phoneNumber", phoneNumberField.getText().trim());
         updatedProps.setProperty("email", emailField.getText().trim());
         updatedProps.setProperty("troopID", troopIDField.getText().trim());
+        updatedProps.setProperty("status", statusField.getText().trim());
+        updatedProps.setProperty("datestatus", datestatusField.getText().trim());
 
         // Validate inputs as needed
         if (updatedProps.getProperty("firstName").isEmpty() || updatedProps.getProperty("lastName").isEmpty()) {
@@ -95,6 +102,8 @@ public class ModifyScoutView extends VBox {
         phoneNumberField.clear();
         emailField.clear();
         troopIDField.clear();
+        statusField.clear();
+        datestatusField.clear();
         statusLog.clearErrorMessage();
     }
 }
