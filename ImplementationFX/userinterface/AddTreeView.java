@@ -13,7 +13,7 @@ public class AddTreeView extends VBox {
     private TextField typeField;
     private TextField ageField;
     private TextField heightField;
-    private TextField locationField;
+    private TextField barcodeField;
     private Button submitButton;
     private Button cancelButton;
     private MessageView statusLog;
@@ -34,8 +34,8 @@ public class AddTreeView extends VBox {
         heightField = new TextField();
         heightField.setPromptText("Tree Height (in meters)");
 
-        locationField = new TextField();
-        locationField.setPromptText("Tree Location");
+        barcodeField = new TextField();
+        barcodeField.setPromptText("BarcodePrefix");
 
         submitButton = new Button("Submit");
         cancelButton = new Button("Cancel");
@@ -46,7 +46,7 @@ public class AddTreeView extends VBox {
                 new Label("Type:"), typeField,
                 new Label("Age:"), ageField,
                 new Label("Height:"), heightField,
-                new Label("Location:"), locationField,
+                new Label("BarcodePrefix:"), barcodeField,
                 buttonBox
         );
 
@@ -61,9 +61,9 @@ public class AddTreeView extends VBox {
         String type = typeField.getText().trim();
         String age = ageField.getText().trim();
         String height = heightField.getText().trim();
-        String location = locationField.getText().trim();
+        String barcode = barcodeField.getText().trim();
 
-        if (type.isEmpty() || age.isEmpty() || height.isEmpty() || location.isEmpty()) {
+        if (type.isEmpty() || age.isEmpty() || height.isEmpty() || barcode.isEmpty()) {
             statusLog.displayErrorMessage("Please fill in all fields.");
             return;
         }
@@ -74,7 +74,7 @@ public class AddTreeView extends VBox {
         treeProps.setProperty("type", type);
         treeProps.setProperty("age", age);
         treeProps.setProperty("height", height);
-        treeProps.setProperty("location", location);
+        treeProps.setProperty("barcodeprefix", barcode);
 
         // Send to controller
         // Example: TreeController.processNewTree(treeProps);
@@ -85,7 +85,7 @@ public class AddTreeView extends VBox {
         typeField.clear();
         ageField.clear();
         heightField.clear();
-        locationField.clear();
+        barcodeField.clear();
         statusLog.clearErrorMessage();
     }
 }
