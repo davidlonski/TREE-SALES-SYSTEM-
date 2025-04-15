@@ -6,6 +6,7 @@ import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import javafx.stage.Stage;
 
+import java.awt.*;
 import java.util.Properties;
 
 public class AddTreeView extends VBox {
@@ -14,6 +15,8 @@ public class AddTreeView extends VBox {
     private TextField ageField;
     private TextField heightField;
     private TextField barcodeField;
+    private TextField statusField;
+    private TextField datestatusField;
     private Button submitButton;
     private Button cancelButton;
     private MessageView statusLog;
@@ -37,6 +40,12 @@ public class AddTreeView extends VBox {
         barcodeField = new TextField();
         barcodeField.setPromptText("BarcodePrefix");
 
+        statusField = new TextField();
+        statusField.setPromptText("Status");
+
+        datestatusField = new TextField();
+        datestatusField.setPromptText("Date Status");
+
         submitButton = new Button("Submit");
         cancelButton = new Button("Cancel");
 
@@ -47,6 +56,8 @@ public class AddTreeView extends VBox {
                 new Label("Age:"), ageField,
                 new Label("Height:"), heightField,
                 new Label("BarcodePrefix:"), barcodeField,
+                new Label("Status:"), statusField,
+                new Label("Date Status:"), datestatusField,
                 buttonBox
         );
 
@@ -62,8 +73,10 @@ public class AddTreeView extends VBox {
         String age = ageField.getText().trim();
         String height = heightField.getText().trim();
         String barcode = barcodeField.getText().trim();
+        String status = statusField.getText().trim();
+        String dateStatus = datestatusField.getText().trim();
 
-        if (type.isEmpty() || age.isEmpty() || height.isEmpty() || barcode.isEmpty()) {
+        if (type.isEmpty() || age.isEmpty() || height.isEmpty() || barcode.isEmpty() || status.isEmpty() || dateStatus.isEmpty()) {
             statusLog.displayErrorMessage("Please fill in all fields.");
             return;
         }
@@ -75,6 +88,8 @@ public class AddTreeView extends VBox {
         treeProps.setProperty("age", age);
         treeProps.setProperty("height", height);
         treeProps.setProperty("barcodeprefix", barcode);
+        treeProps.setProperty("status", status);
+        treeProps.setProperty("datestatus", dateStatus);
 
         // Send to controller
         // Example: TreeController.processNewTree(treeProps);
@@ -86,6 +101,8 @@ public class AddTreeView extends VBox {
         ageField.clear();
         heightField.clear();
         barcodeField.clear();
+        statusField.clear();
+        datestatusField.clear();
         statusLog.clearErrorMessage();
     }
 }
