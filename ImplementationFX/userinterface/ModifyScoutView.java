@@ -1,56 +1,62 @@
 package userinterface;
 
+import impresario.IModel;
 import javafx.geometry.Insets;
+import javafx.scene.Node;
+import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
+import javafx.scene.text.Font;
+import javafx.scene.text.FontWeight;
+import javafx.scene.text.Text;
 
-import java.awt.*;
 import java.util.Properties;
 
 public class ModifyScoutView extends View {
 
-    private TextField firstNameField;
-    private TextField lastNameField;
-    private TextField middleNameField;
-    private TextField dateOfBirthField;
-    private TextField phoneNumberField;
-    private TextField emailField;
-    private TextField troopIDField;
-    private TextField statusField;
-    private TextField datestatusField;
-
-    private Button submitButton;
-    private Button cancelButton;
+    private TextField firstNameField, lastNameField, middleNameField, dateOfBirthField;
+    private TextField phoneNumberField, emailField, troopIDField, statusField, datestatusField;
+    private Button submitButton, cancelButton;
     private MessageView statusLog;
-
     private Properties scoutData;
 
-    public ModifyScoutView(Properties scoutProps) {
+    public ModifyScoutView(IModel model, Properties scoutProps) {
+        super(model, "ModifyScoutView");
         this.scoutData = scoutProps;
 
-        setPadding(new Insets(20));
-        setSpacing(10);
+        VBox container = new VBox(10);
+        container.setPadding(new Insets(20));
+        container.getChildren().addAll(createTitle(), createFormContent(), createStatusLog(""));
 
-        Label titleLabel = new Label("Modify Scout Information");
-        titleLabel.setStyle("-fx-font-size: 20px; -fx-font-weight: bold;");
+        getChildren().add(container);
+    }
 
-        firstNameField = new TextField(scoutProps.getProperty("firstName", ""));
-        lastNameField = new TextField(scoutProps.getProperty("lastName", ""));
-        middleNameField = new TextField(scoutProps.getProperty("middleName", ""));
-        dateOfBirthField = new TextField(scoutProps.getProperty("dateOfBirth", ""));
-        phoneNumberField = new TextField(scoutProps.getProperty("phoneNumber", ""));
-        emailField = new TextField(scoutProps.getProperty("email", ""));
-        troopIDField = new TextField(scoutProps.getProperty("troopID", ""));
-        statusField = new TextField(scoutProps.getProperty("status", ""));
-        datestatusField = new TextField(scoutProps.getProperty("datestatus", ""));
+    private Node createTitle() {
+        Text titleText = new Text("Modify Scout Information");
+        titleText.setFont(Font.font("Arial", FontWeight.BOLD, 20));
+        return titleText;
+    }
+
+    private VBox createFormContent() {
+        VBox form = new VBox(10);
+
+        firstNameField = new TextField(scoutData.getProperty("firstName", ""));
+        lastNameField = new TextField(scoutData.getProperty("lastName", ""));
+        middleNameField = new TextField(scoutData.getProperty("middleName", ""));
+        dateOfBirthField = new TextField(scoutData.getProperty("dateOfBirth", ""));
+        phoneNumberField = new TextField(scoutData.getProperty("phoneNumber", ""));
+        emailField = new TextField(scoutData.getProperty("email", ""));
+        troopIDField = new TextField(scoutData.getProperty("troopID", ""));
+        statusField = new TextField(scoutData.getProperty("status", ""));
+        datestatusField = new TextField(scoutData.getProperty("datestatus", ""));
 
         submitButton = new Button("Submit Changes");
         cancelButton = new Button("Cancel");
 
-        HBox buttonBox = new HBox(10, submitButton, cancelButton);
+        submitButton.setOnAction(e -> processSubmission());
+        cancelButton.setOnAction(e -> clearForm());
 
-        getChildren().addAll(
-                titleLabel,
+        form.getChildren().addAll(
                 new Label("First Name:"), firstNameField,
                 new Label("Last Name:"), lastNameField,
                 new Label("Middle Name:"), middleNameField,
@@ -60,14 +66,15 @@ public class ModifyScoutView extends View {
                 new Label("Troop ID:"), troopIDField,
                 new Label("Status:"), statusField,
                 new Label("Date Status:"), datestatusField,
-                buttonBox
+                new HBox(10, submitButton, cancelButton)
         );
 
-        statusLog = new MessageView("");
-        getChildren().add(statusLog);
+        return form;
+    }
 
-        submitButton.setOnAction(e -> processSubmission());
-        cancelButton.setOnAction(e -> clearForm());
+    protected MessageView createStatusLog(String initialMessage) {
+        statusLog = new MessageView(initialMessage);
+        return statusLog;
     }
 
     private void processSubmission() {
@@ -82,15 +89,14 @@ public class ModifyScoutView extends View {
         updatedProps.setProperty("troopID", troopIDField.getText().trim());
         updatedProps.setProperty("status", statusField.getText().trim());
         updatedProps.setProperty("datestatus", datestatusField.getText().trim());
+        updatedProps.setProperty("scoutID", scoutData.getProperty("scoutID"));
 
-        // Validate inputs as needed
         if (updatedProps.getProperty("firstName").isEmpty() || updatedProps.getProperty("lastName").isEmpty()) {
             statusLog.displayErrorMessage("First and Last Name are required.");
             return;
         }
 
-        // Send updated data to controller
-        // Example: controller.processModifiedScout(updatedProps);
+        myModel.stateChangeRequest("ModifyScoutData", updatedProps);
         statusLog.displayMessage("Scout info updated successfully!");
     }
 
@@ -105,5 +111,22 @@ public class ModifyScoutView extends View {
         statusField.clear();
         datestatusField.clear();
         statusLog.clearErrorMessage();
+    }
+
+    @Override
+    public void updateState(String key, Object value) {
+        if ("TransactionStatusMessage".equals(key)) {
+            String msg = (String) value;
+            if (msg.toLowerCase().startsWith("error")) {
+                statusLog.displayErrorMessage(msg);
+            } else {
+                statusLog.displayMessage(msg);
+            }
+        }
+    }
+
+    @Override
+    public Scene createScene() {
+        return new Scene(this, 600, 600);
     }
 }
