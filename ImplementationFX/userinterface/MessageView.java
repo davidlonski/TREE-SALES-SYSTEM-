@@ -13,74 +13,65 @@
 package userinterface;
 
 // system imports
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
-import javafx.geometry.Insets;
-import javafx.geometry.Pos;
-import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.PasswordField;
-import javafx.scene.control.TextField;
-import javafx.scene.layout.GridPane;
-import javafx.scene.layout.HBox;
 import javafx.scene.paint.Color;
-import javafx.scene.text.TextAlignment;
 import javafx.scene.text.Font;
-import javafx.scene.text.FontPosture;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
-import javafx.stage.Stage;
+import javafx.scene.text.TextAlignment;
 
-// project imports
-
-//==============================================================
+/**
+ * A UI element for displaying messages to the user.
+ * Supports info, success, and error messages in different colors.
+ */
 public class MessageView extends Text
 {
-
-	// Class constructor
-	//----------------------------------------------------------
+	// Constructor
 	public MessageView(String initialMessage)
 	{
 		super(initialMessage);
 		setFont(Font.font("Helvetica", FontWeight.BOLD, 16));
-		setFill(Color.BLUE);
+		setFill(Color.BLUE); // Default to info color
 		setTextAlignment(TextAlignment.LEFT);
 	}
 
 	/**
-	 * Display ordinary message
+	 * Display an informational message (blue text).
 	 */
-	//----------------------------------------------------------
 	public void displayMessage(String message)
 	{
-		// display the passed text in red
 		setFill(Color.BLUE);
 		setText(message);
 	}
 
 	/**
-	 * Display error message
+	 * Display a success message (green text).
 	 */
-	//----------------------------------------------------------
+	public void displaySuccessMessage(String message)
+	{
+		setFill(Color.GREEN);
+		setText(message);
+	}
+
+	/**
+	 * Display an error message (red text).
+	 */
 	public void displayErrorMessage(String message)
 	{
-		// display the passed text in red
 		setFill(Color.RED);
 		setText(message);
 	}
 
 	/**
-	 * Clear error message
+	 * Clear the message.
 	 */
-	//----------------------------------------------------------
-	public void clearErrorMessage()
+	public void clearMessage()
 	{
-		setText("                           ");
+		setText("");
 	}
 
-
+	// For compatibility with older code that uses this:
+	public void clearErrorMessage()
+	{
+		clearMessage();
+	}
 }
-
-
-
