@@ -78,11 +78,31 @@ public class ModifyScoutView extends View {
     }
 
     private void processSubmission() {
-        Properties updatedProps = new Properties();
+        String firstName = firstNameField.getText().trim();
+        String middleName = middleNameField.getText().trim();
+        String lastName = lastNameField.getText().trim();
 
-        updatedProps.setProperty("firstName", firstNameField.getText().trim());
-        updatedProps.setProperty("lastName", lastNameField.getText().trim());
-        updatedProps.setProperty("middleName", middleNameField.getText().trim());
+        if (firstName.isEmpty() || lastName.isEmpty()) {
+            statusLog.displayErrorMessage("First and Last Name are required.");
+            return;
+        }
+        if (firstName.length() > 20) {
+            statusLog.displayErrorMessage("First name cannot exceed 20 characters.");
+            return;
+        }
+        if (middleName.length() > 20) {
+            statusLog.displayErrorMessage("Middle name cannot exceed 20 characters.");
+            return;
+        }
+        if (lastName.length() > 20) {
+            statusLog.displayErrorMessage("Last name cannot exceed 20 characters.");
+            return;
+        }
+
+        Properties updatedProps = new Properties();
+        updatedProps.setProperty("firstName", firstName);
+        updatedProps.setProperty("lastName", lastName);
+        updatedProps.setProperty("middleName", middleName);
         updatedProps.setProperty("dateOfBirth", dateOfBirthField.getText().trim());
         updatedProps.setProperty("phoneNumber", phoneNumberField.getText().trim());
         updatedProps.setProperty("email", emailField.getText().trim());
@@ -91,14 +111,10 @@ public class ModifyScoutView extends View {
         updatedProps.setProperty("datestatus", datestatusField.getText().trim());
         updatedProps.setProperty("scoutID", scoutData.getProperty("scoutID"));
 
-        if (updatedProps.getProperty("firstName").isEmpty() || updatedProps.getProperty("lastName").isEmpty()) {
-            statusLog.displayErrorMessage("First and Last Name are required.");
-            return;
-        }
-
         myModel.stateChangeRequest("ModifyScoutData", updatedProps);
         statusLog.displayMessage("Scout info updated successfully!");
     }
+
 
     private void clearForm() {
         firstNameField.clear();

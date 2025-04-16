@@ -43,6 +43,20 @@ public class Scout extends EntityBase implements IView, impresario.IModel {
         setDependencies();
         persistentState = new Properties();
 
+        String firstName = props.getProperty("FirstName");
+        String middleName = props.getProperty("MiddleName");
+        String lastName = props.getProperty("LastName");
+
+        if (firstName != null && firstName.length() > 20) {
+            throw new IllegalArgumentException("First name must be 20 characters or fewer.");
+        }
+        if (middleName != null && middleName.length() > 20) {
+            throw new IllegalArgumentException("Middle name must be 20 characters or fewer.");
+        }
+        if (lastName != null && lastName.length() > 20) {
+            throw new IllegalArgumentException("Last name must be 20 characters or fewer.");
+        }
+
         Enumeration<?> keys = props.propertyNames();
         while (keys.hasMoreElements()) {
             String key = (String) keys.nextElement();
@@ -52,6 +66,8 @@ public class Scout extends EntityBase implements IView, impresario.IModel {
 
         setDefaultStatus();
     }
+
+
 
     private void setDefaultStatus() {
         if (!persistentState.containsKey("Status")) {

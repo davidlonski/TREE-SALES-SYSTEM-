@@ -106,10 +106,27 @@ public class ScoutView extends View {
         clearErrorMessage();
 
         try {
+            String firstName = firstNameField.getText().trim();
+            String middleName = middleNameField.getText().trim();
+            String lastName = lastNameField.getText().trim();
+
+            if (firstName.length() > 20) {
+                displayErrorMessage("First name cannot exceed 20 characters.");
+                return;
+            }
+            if (middleName.length() > 20) {
+                displayErrorMessage("Middle name cannot exceed 20 characters.");
+                return;
+            }
+            if (lastName.length() > 20) {
+                displayErrorMessage("Last name cannot exceed 20 characters.");
+                return;
+            }
+
             Properties scoutData = new Properties();
-            scoutData.setProperty("firstName", firstNameField.getText().trim());
-            scoutData.setProperty("middleName", middleNameField.getText().trim());
-            scoutData.setProperty("lastName", lastNameField.getText().trim());
+            scoutData.setProperty("firstName", firstName);
+            scoutData.setProperty("middleName", middleName);
+            scoutData.setProperty("lastName", lastName);
             scoutData.setProperty("dateOfBirth", dobField.getText().trim());
             scoutData.setProperty("phoneNumber", phoneField.getText().trim());
             scoutData.setProperty("email", emailField.getText().trim());
@@ -123,6 +140,7 @@ public class ScoutView extends View {
             displayErrorMessage("Error submitting scout: " + e.getMessage());
         }
     }
+
 
     protected MessageView createStatusLog(String initialMessage) {
         statusLog = new MessageView(initialMessage);
