@@ -15,7 +15,7 @@ import java.util.Properties;
 
 public class AddTreeView extends View {
 
-    private TextField typeField;
+    private ComboBox<String> typeComboBox;
     private TextField barcodeField;
     private TextField statusField;
     private TextField dateStatusField;
@@ -36,14 +36,12 @@ public class AddTreeView extends View {
         getChildren().add(container);
     }
 
-    // ---------------------------------------------------------
     private Node createTitle() {
         Text titleText = new Text(" Add New Tree ");
         titleText.setFont(Font.font("Arial", FontWeight.BOLD, 20));
         return titleText;
     }
 
-    // ---------------------------------------------------------
     private VBox createFormContent() {
         VBox vbox = new VBox(10);
         GridPane grid = new GridPane();
@@ -52,20 +50,32 @@ public class AddTreeView extends View {
         grid.setVgap(10);
         grid.setPadding(new Insets(25, 25, 25, 25));
 
-        typeField = new TextField();
-        typeField.setPromptText("Tree Type");
+        typeComboBox = new ComboBox<>();
+        typeComboBox.getItems().addAll(
+                "Frasier Fir - Regular",
+                "Frasier Fir - Premium",
+                "Douglass Fir - Regular",
+                "Douglass Fir - Premium",
+                "Blue Spruce - Regular",
+                "Blue Spruce - Premium",
+                "Concolor - Regular",
+                "Concolor - Premium",
+                "Balsam Fir - Regular",
+                "Balsam Fir - Premium"
+        );
+        typeComboBox.setPromptText("Select Tree Type");
 
         barcodeField = new TextField();
         barcodeField.setPromptText("Barcode Prefix");
 
-        statusField = new TextField();
+        statusField = new TextField("Active");
         statusField.setPromptText("Status");
 
         dateStatusField = new TextField();
         dateStatusField.setPromptText("Date Status (YYYY-MM-DD)");
 
         grid.add(new Label("Tree Type:"), 0, 0);
-        grid.add(typeField, 1, 0);
+        grid.add(typeComboBox, 1, 0);
         grid.add(new Label("Barcode Prefix:"), 0, 1);
         grid.add(barcodeField, 1, 1);
         grid.add(new Label("Status:"), 0, 2);
@@ -90,16 +100,15 @@ public class AddTreeView extends View {
         return vbox;
     }
 
-    // ---------------------------------------------------------
     private void handleSubmit() {
         clearErrorMessage();
 
-        String type = typeField.getText().trim();
+        String type = typeComboBox.getValue();
         String barcode = barcodeField.getText().trim();
         String status = statusField.getText().trim();
         String dateStatus = dateStatusField.getText().trim();
 
-        if (type.isEmpty() || barcode.isEmpty() || status.isEmpty() || dateStatus.isEmpty()) {
+        if (type == null || barcode.isEmpty() || status.isEmpty() || dateStatus.isEmpty()) {
             displayErrorMessage("All fields are required.");
             return;
         }
@@ -120,13 +129,11 @@ public class AddTreeView extends View {
         }
     }
 
-    // ---------------------------------------------------------
     private void clearFields() {
-        typeField.clear();
+        typeComboBox.setValue(null);
         barcodeField.clear();
-        statusField.clear();
-        dateStatusField.clear();
         statusField.setText("Active");
+        dateStatusField.clear();
     }
 
     private void clearForm() {
@@ -134,7 +141,6 @@ public class AddTreeView extends View {
         clearErrorMessage();
     }
 
-    // ---------------------------------------------------------
     protected MessageView createStatusLog(String initialMessage) {
         statusLog = new MessageView(initialMessage);
         return statusLog;
@@ -168,7 +174,6 @@ public class AddTreeView extends View {
         }
     }
 
-    // ---------------------------------------------------------
     @Override
     public Scene createScene() {
         return new Scene(this, 600, 400);
