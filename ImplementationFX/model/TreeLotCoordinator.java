@@ -19,6 +19,8 @@ import userinterface.ViewFactory;
 import userinterface.WindowPosition;
 
 public class TreeLotCoordinator implements IView, IModel {
+
+    private ScoutCollection sc;
     // For Impresario
     private Properties dependencies;
     private ModelRegistry myRegistry;
@@ -92,27 +94,39 @@ public class TreeLotCoordinator implements IView, IModel {
         swapToView(currentScene);
     }
 
-    /*private void createAndShowModifyScoutView(Properties scoutProps) {
-        View newView = ViewFactory.createView("ModifyScoutView", this, scoutProps);
+    private void createAndShowModifyScoutView(Properties scoutProps) {
+        View newView = ViewFactory.createView("ModifyScoutView", this);
         Scene newScene = new Scene(newView);
         myViews.put("ModifyScoutView", newScene);
         swapToView(newScene);
-    }*/
+    }
 
-    /*private void createAndShowRemoveScoutView(Properties scoutProps) {
-        View newView = ViewFactory.createView("RemoveScoutView", this, scoutProps);
+    private void createAndShowRemoveScoutView(Properties scoutProps) {
+        View newView = ViewFactory.createView("RemoveScoutView", this);
         Scene newScene = new Scene(newView);
         myViews.put("RemoveScoutView", newScene);
         swapToView(newScene);
-    }*/
+    }
 
-    private void createAndShowScoutCollectionView() {
+    private void createAndShowScoutCollectionView(ScoutCollection scoutCollection) {
         Scene currentScene = myViews.get("ScoutCollectionView");
 
         if (currentScene == null) {
             View newView = ViewFactory.createView("ScoutCollectionView", this);
             currentScene = new Scene(newView);
             myViews.put("ScoutCollectionView", currentScene);
+        }
+
+        swapToView(currentScene);
+    }
+
+    private void createAndShowScoutSearchView() {
+        Scene currentScene = myViews.get("ScoutSearchView");
+
+        if (currentScene == null) {
+            View newView = ViewFactory.createView("ScoutSearchView", this);
+            currentScene = new Scene(newView);
+            myViews.put("ScoutSearchView", currentScene);
         }
 
         swapToView(currentScene);
@@ -141,24 +155,43 @@ public class TreeLotCoordinator implements IView, IModel {
         switch (key) {
             case "AddTreeTransaction" -> createAndShowAddTreeView();
             case "AddScoutTransaction" -> createAndShowScoutView();
-            case "ModifyScoutTransaction" -> createAndShowScoutCollectionView(); // You select the scout from this view
-            case "RemoveScoutTransaction" -> createAndShowScoutCollectionView(); // You select the scout from this view
+            case "ModifyScoutTransaction" -> createAndShowScoutSearchView(); // First show ScoutSearchView
+            case "RemoveScoutTransaction" -> createAndShowScoutSearchView(); // First show ScoutSearchView
             case "ShowModifyScoutView" -> {
                 if (value instanceof Properties props) {
-                    //createAndShowModifyScoutView(props);
+                    createAndShowModifyScoutView(props); // Show ModifyScoutView after selection
                 }
             }
             case "ShowRemoveScoutView" -> {
                 if (value instanceof Properties props) {
-                    //createAndShowRemoveScoutView(props);
+                    createAndShowRemoveScoutView(props); // Show RemoveScoutView after selection
                 }
             }
             case "CancelTransaction" -> createAndShowTransactionChoiceView();
+            case "CancelSearch" -> createAndShowTransactionChoiceView(); // Add case for cancel
+            case "SearchScouts" -> {
+                String lastName = (String) value;
+                searchScouts(lastName); // Call method to search for scouts
+            }
             case "Done" -> myStage.close();
         }
 
         myRegistry.updateSubscribers(key, this);
     }
+
+    private void searchScouts(String lastName) {
+
+        try{
+            sc = new ScoutCollection();
+            this.sc.findScoutsWithLastNameLike(lastName);
+            createAndShowScoutCollectionView(sc);
+        }
+        catch (Exception e){
+            System.out.println("Error fetching scouts: " + e);
+            e.printStackTrace();
+        }
+    }
+
 
     @Override
     public void updateState(String key, Object value) {

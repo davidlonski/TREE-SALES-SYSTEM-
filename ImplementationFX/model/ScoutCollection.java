@@ -26,15 +26,10 @@ public class ScoutCollection extends EntityBase implements IView, impresario.IMo
         }
     }
 
-    public void findScoutsWithLastNameLike(String lastName) {
+    public void findScoutsWithLastNameLike(String name) {
         scouts = new Vector<>();
-        String query = "SELECT * FROM " + myTableName + " WHERE LastName LIKE '%" + lastName + "%' ORDER BY FirstName ASC";
-        Vector<Properties> results = getSelectQueryResult(query);
-        if (results != null) {
-            for (Properties props : results) {
-                scouts.add(new Scout(props));
-            }
-        }
+        String query = "SELECT * FROM " + myTableName + " WHERE LastName LIKE '%" + name + "%'";
+        populateScouts(query);
     }
 
     public Object getState(String key) {
@@ -50,6 +45,15 @@ public class ScoutCollection extends EntityBase implements IView, impresario.IMo
     protected void initializeSchema(String tableName) {
         if (mySchema == null) {
             mySchema = getSchemaInfo(tableName);
+        }
+    }
+
+    private void populateScouts(String query) {
+        Vector<Properties> results = getSelectQueryResult(query);
+        if (results != null) {
+            for (Properties data : results) {
+                scouts.add(new Scout(data));
+            }
         }
     }
 

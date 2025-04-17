@@ -49,8 +49,8 @@ public class ScoutCollectionView extends View {
 
             tableOfScouts.getItems().clear();
             for (Scout scout : entryList) {
-                Vector<String> scoutData = scout.getEntryListView();  // Get data from Scout
-                ScoutTableModel row = new ScoutTableModel(scoutData);  // Pass the vector to the model
+                Vector<String> scoutData = scout.getEntryListView();
+                ScoutTableModel row = new ScoutTableModel(scoutData);
                 tableData.add(row);
             }
 
@@ -60,9 +60,8 @@ public class ScoutCollectionView extends View {
         }
     }
 
-
     private Node createTitle() {
-        Text titleText = new Text(" Scout Collection ");
+        Text titleText = new Text("Scout Collection");
         titleText.setFont(Font.font("Arial", FontWeight.BOLD, 20));
         return titleText;
     }
@@ -76,19 +75,37 @@ public class ScoutCollectionView extends View {
         tableOfScouts = new TableView<>();
         tableOfScouts.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
 
-        TableColumn<ScoutTableModel, String> idCol = new TableColumn<>("ID");
-        idCol.setCellValueFactory(new PropertyValueFactory<>("scoutId"));
+        TableColumn<ScoutTableModel, String> firstNameCol = new TableColumn<>("First Name");
+        firstNameCol.setCellValueFactory(new PropertyValueFactory<>("firstName"));
 
-        TableColumn<ScoutTableModel, String> nameCol = new TableColumn<>("Name");
-        nameCol.setCellValueFactory(new PropertyValueFactory<>("name"));
+        TableColumn<ScoutTableModel, String> middleNameCol = new TableColumn<>("Middle Name");
+        middleNameCol.setCellValueFactory(new PropertyValueFactory<>("middleName"));
+
+        TableColumn<ScoutTableModel, String> lastNameCol = new TableColumn<>("Last Name");
+        lastNameCol.setCellValueFactory(new PropertyValueFactory<>("lastName"));
+
+        TableColumn<ScoutTableModel, String> dobCol = new TableColumn<>("Date of Birth");
+        dobCol.setCellValueFactory(new PropertyValueFactory<>("dateOfBirth"));
 
         TableColumn<ScoutTableModel, String> phoneCol = new TableColumn<>("Phone");
         phoneCol.setCellValueFactory(new PropertyValueFactory<>("phoneNumber"));
 
+        TableColumn<ScoutTableModel, String> emailCol = new TableColumn<>("Email");
+        emailCol.setCellValueFactory(new PropertyValueFactory<>("email"));
+
+        TableColumn<ScoutTableModel, String> troopIdCol = new TableColumn<>("Troop ID");
+        troopIdCol.setCellValueFactory(new PropertyValueFactory<>("troopId"));
+
         TableColumn<ScoutTableModel, String> statusCol = new TableColumn<>("Status");
         statusCol.setCellValueFactory(new PropertyValueFactory<>("status"));
 
-        tableOfScouts.getColumns().addAll(idCol, nameCol, phoneCol, statusCol);
+        TableColumn<ScoutTableModel, String> statusDateCol = new TableColumn<>("Status Date");
+        statusDateCol.setCellValueFactory(new PropertyValueFactory<>("dateStatusUpdated"));
+
+        tableOfScouts.getColumns().addAll(
+                firstNameCol, middleNameCol, lastNameCol, dobCol,
+                phoneCol, emailCol, troopIdCol, statusCol, statusDateCol
+        );
 
         tableOfScouts.setOnMousePressed((MouseEvent event) -> {
             if (event.isPrimaryButtonDown() && event.getClickCount() >= 2) {
@@ -108,6 +125,7 @@ public class ScoutCollectionView extends View {
         vbox.getChildren().addAll(prompt, tableOfScouts, btnBox);
         return vbox;
     }
+
 
     protected void processScoutSelected() {
         ScoutTableModel selected = tableOfScouts.getSelectionModel().getSelectedItem();
@@ -147,5 +165,4 @@ public class ScoutCollectionView extends View {
 
         return new Scene(container, 600, 400);
     }
-
 }

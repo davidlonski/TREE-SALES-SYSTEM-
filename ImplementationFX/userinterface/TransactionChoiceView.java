@@ -28,14 +28,12 @@ import impresario.IModel;
 
 public class TransactionChoiceView extends View {
 
-
     private Button addScoutTransactionButton;
     private Button modifyScoutTransactionButton;
     private Button removeScoutTransactionButton;
     private Button addTreeTransactionButton;
 
     private Button closeTransactionButton;
-
 
     private MessageView statusLog;
 
@@ -60,13 +58,10 @@ public class TransactionChoiceView extends View {
     //-------------------------------------------------------------
     private Node createTitle()
     {
-
         Text titleText = new Text("       Transaction Choice          ");
         titleText.setFont(Font.font("Arial", FontWeight.BOLD, 20));
         titleText.setTextAlignment(TextAlignment.CENTER);
         titleText.setFill(Color.DARKGREEN);
-
-
         return titleText;
     }
 
@@ -94,7 +89,8 @@ public class TransactionChoiceView extends View {
         modifyScoutTransactionButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
-                processAction(event);
+                clearErrorMessage();
+                myModel.stateChangeRequest("ModifyScoutTransaction", null);
             }
         });
         modifyScoutTransactionButton.setPrefWidth(150);
@@ -158,27 +154,28 @@ public class TransactionChoiceView extends View {
     public void processAction(Event evt){
         if (evt.getSource() == addScoutTransactionButton){
             myModel.stateChangeRequest("AddScoutTransaction", null);
-        }else if(evt.getSource() == modifyScoutTransactionButton){
-            myModel.stateChangeRequest("ModifyScoutTransaction", null);
-        }else if(evt.getSource() == removeScoutTransactionButton){
-            myModel.stateChangeRequest("RemoveScoutTransaction", null);
-        }else if(evt.getSource() == addTreeTransactionButton){
+        } else if(evt.getSource() == modifyScoutTransactionButton){
+            // Navigate to ScoutSearchView
+            myModel.stateChangeRequest("ModifyScoutTransaction", null); // Trigger ScoutSearchView
+        } else if(evt.getSource() == removeScoutTransactionButton){
+            // Navigate to ScoutSearchView
+            myModel.stateChangeRequest("RemoveScoutTransaction", null); // Trigger ScoutSearchView
+        } else if(evt.getSource() == addTreeTransactionButton){
             myModel.stateChangeRequest("AddTreeTransaction", null);
-        }else if(evt.getSource() == closeTransactionButton){
+        } else if(evt.getSource() == closeTransactionButton){
             myModel.stateChangeRequest("Done", null);
         }
-
     }
 
     @Override
     public void updateState(String key, Object value) {
         if (key.equals("addScoutTransactionError")==true){
             displayErrorMessage((String)value);
-        }else if(key.equals("modifyScoutTransactionError")==true){
+        } else if(key.equals("modifyScoutTransactionError")==true){
             displayErrorMessage((String)value);
-        }else if(key.equals("removeScoutTransactionError")==true){
+        } else if(key.equals("removeScoutTransactionError")==true){
             displayErrorMessage((String)value);
-        }else if(key.equals("addTreeTransactionError")==true){
+        } else if(key.equals("addTreeTransactionError")==true){
             displayErrorMessage((String)value);
         }
     }

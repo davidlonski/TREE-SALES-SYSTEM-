@@ -54,7 +54,7 @@ public class ModifyScoutView extends View {
         cancelButton = new Button("Cancel");
 
         submitButton.setOnAction(e -> processSubmission());
-        cancelButton.setOnAction(e -> clearForm());
+        cancelButton.setOnAction(e -> cancelAction());
 
         form.getChildren().addAll(
                 new Label("First Name:"), firstNameField,
@@ -115,6 +115,11 @@ public class ModifyScoutView extends View {
         statusLog.displayMessage("Scout info updated successfully!");
     }
 
+    private void cancelAction() {
+        // Handle cancel button: go back to previous view or clear the form
+        clearForm();
+        myModel.stateChangeRequest("CancelModifyScout", null);  // Or transition back to the previous view
+    }
 
     private void clearForm() {
         firstNameField.clear();
