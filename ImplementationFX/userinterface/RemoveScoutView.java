@@ -17,15 +17,16 @@ public class RemoveScoutView extends View {
     private Label scoutInfoLabel;
     private Button confirmButton, cancelButton;
     private MessageView statusLog;
-    private String scoutID;
 
-    public RemoveScoutView(IModel model, Properties scoutProps) {
+    private final Properties scoutProps;
+
+    public RemoveScoutView(IModel model, Properties props) {
         super(model, "RemoveScoutView");
-        this.scoutID = scoutProps.getProperty("scoutID");
+        this.scoutProps = props;
 
         VBox container = new VBox(10);
         container.setPadding(new Insets(20));
-        container.getChildren().addAll(createTitle(), createFormContent(scoutProps), createStatusLog(""));
+        container.getChildren().addAll(createTitle(), createFormContent(), createStatusLog(""));
 
         getChildren().add(container);
     }
@@ -36,22 +37,22 @@ public class RemoveScoutView extends View {
         return titleText;
     }
 
-    private Node createFormContent(Properties scoutProps) {
+    private Node createFormContent() {
         VBox box = new VBox(10);
 
-        scoutInfoLabel = new Label(formatScoutInfo(scoutProps));
+        scoutInfoLabel = new Label(formatScoutInfo());
         scoutInfoLabel.setWrapText(true);
         scoutInfoLabel.setStyle("-fx-border-color: gray; -fx-padding: 10; -fx-background-color: #f9f9f9;");
 
         confirmButton = new Button("Confirm Removal");
         confirmButton.setStyle("-fx-background-color: red; -fx-text-fill: white;");
-        cancelButton = new Button("Cancel");
+        confirmButton.setOnAction(e -> myModel.stateChangeRequest("RemoveScout", null));
 
-        confirmButton.setOnAction(e -> processRemoval());
-        cancelButton.setOnAction(e -> cancelRemoval());
+        cancelButton = new Button("Cancel");
+        cancelButton.setOnAction(e -> myModel.stateChangeRequest("CancelRemoval", null));
 
         box.getChildren().addAll(
-                new Label("Are you sure you want to remove the following scout?"),
+                new Label("Are you sure you want to remove this scout?"),
                 scoutInfoLabel,
                 new HBox(10, confirmButton, cancelButton)
         );
@@ -59,8 +60,8 @@ public class RemoveScoutView extends View {
         return box;
     }
 
-    private String formatScoutInfo(Properties scoutProps) {
-        return String.format("Scout ID: %s\nName: %s %s\nDate of Birth: %s\nPhone: %s\nEmail: %s\nTroop ID: %s",
+    private String formatScoutInfo() {
+        return String.format("Scout ID: %s\nName: %s %s\nDOB: %s\nPhone: %s\nEmail: %s\nTroop ID: %s",
                 scoutProps.getProperty("scoutID"),
                 scoutProps.getProperty("firstName"),
                 scoutProps.getProperty("lastName"),
@@ -74,23 +75,6 @@ public class RemoveScoutView extends View {
     protected MessageView createStatusLog(String initialMessage) {
         statusLog = new MessageView(initialMessage);
         return statusLog;
-    }
-
-    private void processRemoval() {
-        if (scoutID == null || scoutID.isEmpty()) {
-            statusLog.displayErrorMessage("Invalid Scout ID. Cannot remove.");
-            return;
-        }
-
-        Properties p = new Properties();
-        p.setProperty("scoutID", scoutID);
-
-        myModel.stateChangeRequest("RemoveScout", p);
-        statusLog.displayMessage("Scout removed successfully.");
-    }
-
-    private void cancelRemoval() {
-        statusLog.clearErrorMessage();
     }
 
     @Override

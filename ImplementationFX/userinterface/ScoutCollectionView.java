@@ -46,8 +46,10 @@ public class ScoutCollectionView extends View {
         try {
             ScoutCollection scoutCollection = (ScoutCollection) myModel.getState("ScoutList");
             Vector<Scout> entryList = (Vector<Scout>) scoutCollection.getState("Scouts");
+            Enumeration entries = entryList.elements();
 
             tableOfScouts.getItems().clear();
+
             for (Scout scout : entryList) {
                 Vector<String> scoutData = scout.getEntryListView();
                 ScoutTableModel row = new ScoutTableModel(scoutData);
@@ -114,7 +116,7 @@ public class ScoutCollectionView extends View {
         });
 
         submitButton = new Button("Select");
-        submitButton.setOnAction(e -> processScoutSelected());
+        submitButton.setOnAction(e -> myModel.stateChangeRequest("processScoutSelected", null));
 
         cancelButton = new Button("Back");
         cancelButton.setOnAction((ActionEvent e) -> myModel.stateChangeRequest("CancelScoutList", null));

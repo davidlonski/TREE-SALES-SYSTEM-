@@ -16,11 +16,9 @@ public class RemoveScoutTransaction implements IModel, IView {
     private String transactionStatusMessage = "";
 
     private ScoutCollection scoutCollection;
-    private Scout selectedScout;
+    private Properties selectedScoutProps;
 
-    public RemoveScoutTransaction() {
-        // No dependencies to initialize
-    }
+    public RemoveScoutTransaction() {}
 
     @Override
     public void stateChangeRequest(String key, Object value) {
@@ -42,37 +40,39 @@ public class RemoveScoutTransaction implements IModel, IView {
                 break;
 
             case "ScoutSelected":
-                selectedScout = new Scout((Properties) value);
+                selectedScoutProps = (Properties) value;
                 createAndShowRemoveScoutView();
                 break;
 
             case "RemoveScout":
-                processRemoval((Properties) value);
+                processRemoval();
+                break;
+
+            case "CancelRemoval":
+                transactionStatusMessage = "Scout removal cancelled.";
+                updateSubscribers("TransactionStatusMessage", this);
                 break;
         }
 
         updateSubscribers(key, this);
     }
 
-    private void processRemoval(Properties props) {
-        String scoutId = props.getProperty("scoutID");
-
-        if (scoutId == null || scoutId.isEmpty()) {
-            transactionStatusMessage = "ERROR: No Scout ID provided.";
+    private void processRemoval() {
+        if (selectedScoutProps == null || selectedScoutProps.getProperty("scoutID") == null) {
+            transactionStatusMessage = "ERROR: No Scout selected for removal.";
             return;
         }
 
         try {
-            selectedScout = new Scout(scoutId);
-            selectedScout.deleteScout();
-            transactionStatusMessage = "Scout successfully removed from the system.";
+            String scoutId = selectedScoutProps.getProperty("scoutID");
+            Scout s = new Scout(scoutId);
+            s.deleteScout();
+            transactionStatusMessage = "Scout successfully removed.";
         } catch (InvalidPrimaryKeyException e) {
-            transactionStatusMessage = "ERROR: Scout not found with ID: " + scoutId;
+            transactionStatusMessage = "ERROR: Scout not found.";
         } catch (SQLException e) {
-            transactionStatusMessage = "ERROR: Database error while removing Scout: " + e.getMessage();
+            transactionStatusMessage = "ERROR: Database error: " + e.getMessage();
         }
-
-        updateSubscribers("TransactionStatusMessage", this);
     }
 
     private void createAndShowScoutSearchView() {
@@ -84,15 +84,13 @@ public class RemoveScoutTransaction implements IModel, IView {
     }
 
     private void createAndShowRemoveScoutView() {
-        ViewFactory.createView("RemoveScoutView", selectedScout);
+        ViewFactory.createView("RemoveScoutView", this);
     }
 
     @Override
     public Object getState(String key) {
         if ("TransactionStatusMessage".equals(key)) {
             return transactionStatusMessage;
-        } else if (selectedScout != null) {
-            return selectedScout.getState(key);
         }
         return null;
     }
@@ -104,26 +102,19 @@ public class RemoveScoutTransaction implements IModel, IView {
 
     @Override
     public void subscribe(String key, IView subscriber) {
-        Vector<IView> subs = subscribers.computeIfAbsent(key, k -> new Vector<>());
-        if (!subs.contains(subscriber)) {
-            subs.add(subscriber);
-        }
+        subscribers.computeIfAbsent(key, k -> new Vector<>()).add(subscriber);
     }
 
     @Override
     public void unSubscribe(String key, IView subscriber) {
         Vector<IView> subs = subscribers.get(key);
-        if (subs != null) {
-            subs.remove(subscriber);
-        }
+        if (subs != null) subs.remove(subscriber);
     }
 
     public void updateSubscribers(String key, Object value) {
         Vector<IView> subs = subscribers.get(key);
         if (subs != null) {
-            for (IView view : subs) {
-                view.updateState(key, value);
-            }
+            for (IView view : subs) view.updateState(key, value);
         }
     }
 }

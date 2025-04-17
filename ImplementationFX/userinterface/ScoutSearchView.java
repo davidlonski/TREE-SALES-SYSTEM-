@@ -59,6 +59,7 @@ public class ScoutSearchView extends View {
     }
 
     private void processSearch() {
+        clearErrorMessage();
         String lastName = lastNameField.getText().trim();
         if (lastName.isEmpty()) {
             statusLog.displayErrorMessage("Last name cannot be empty.");
@@ -67,6 +68,10 @@ public class ScoutSearchView extends View {
 
         // Send the search request to the model
         myModel.stateChangeRequest("SearchScouts", lastName);
+    }
+
+    public void clearErrorMessage() {
+        statusLog.clearErrorMessage();
     }
 
     private void cancelAction() {

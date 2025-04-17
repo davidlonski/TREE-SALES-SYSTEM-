@@ -135,9 +135,17 @@ public class TreeLotCoordinator implements IView, IModel {
     // IModel Implementation
     @Override
     public Object getState(String key) {
-        return switch (key) {
-            default -> "";
-        };
+        if (key.equals("TreeLotCoordinator")) {
+            return this;
+        }
+        else if (key.equals("ScoutList")) {
+            return sc;
+        }
+        //else if (key.equals("processScoutSelected")) {
+          //  return new
+        //}
+        else
+        return null;
     }
 
     @Override

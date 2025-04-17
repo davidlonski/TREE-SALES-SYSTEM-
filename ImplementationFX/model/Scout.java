@@ -138,6 +138,7 @@ public class Scout extends EntityBase implements IView, impresario.IModel {
         deletePersistentState(mySchema, whereClause);
     }
 
+
     private Properties getStateAsProperties() {
         Properties data = new Properties();
         data.setProperty("ID", persistentState.getProperty("ID", ""));
