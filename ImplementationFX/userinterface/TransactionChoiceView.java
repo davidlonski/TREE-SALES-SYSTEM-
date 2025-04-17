@@ -76,7 +76,7 @@ public class TransactionChoiceView extends View {
         VBox buttonBox = new VBox(10);  // 10 is the spacing between buttons
         buttonBox.setAlignment(Pos.CENTER);
 
-        addScoutTransactionButton = new Button("Add Scout Transaction");
+        addScoutTransactionButton = new Button("Add A Scout");
         addScoutTransactionButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
@@ -85,7 +85,7 @@ public class TransactionChoiceView extends View {
         });
         addScoutTransactionButton.setPrefWidth(150);
 
-        modifyScoutTransactionButton = new Button("Modify Scout Transaction");
+        modifyScoutTransactionButton = new Button("Modify A Scout");
         modifyScoutTransactionButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
@@ -95,7 +95,7 @@ public class TransactionChoiceView extends View {
         });
         modifyScoutTransactionButton.setPrefWidth(150);
 
-        removeScoutTransactionButton = new Button("Remove Scout Transaction");
+        removeScoutTransactionButton = new Button("Remove A Scout");
         removeScoutTransactionButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
@@ -104,7 +104,7 @@ public class TransactionChoiceView extends View {
         });
         removeScoutTransactionButton.setPrefWidth(150);
 
-        addTreeTransactionButton = new Button("Add Tree Transaction");
+        addTreeTransactionButton = new Button("Add A Tree");
         addTreeTransactionButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
