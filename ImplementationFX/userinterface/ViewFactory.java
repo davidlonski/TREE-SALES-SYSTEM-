@@ -12,6 +12,9 @@ public class ViewFactory {
 		else if (viewName.equals("ScoutView")) {
 			return new ScoutView(model);
 		}
+		else if (viewName.equals("AddScoutView")) {
+			return new AddScoutView(model);
+		}
 		else if (viewName.equals("AddTreeView")) {
 			return new AddTreeView(model);
 		}

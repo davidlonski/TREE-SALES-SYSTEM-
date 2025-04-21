@@ -19,8 +19,6 @@ import userinterface.ViewFactory;
 import userinterface.WindowPosition;
 
 public class TreeLotCoordinator implements IView, IModel {
-
-    private ScoutCollection sc;
     // For Impresario
     private Properties dependencies;
     private ModelRegistry myRegistry;
@@ -31,6 +29,9 @@ public class TreeLotCoordinator implements IView, IModel {
 
     // Initialize Message Strings for observer pattern
     private String closeStage;
+
+
+    private String transactionErrorMessage = "";
 
     public TreeLotCoordinator() {
         myStage = MainStageContainer.getInstance();
@@ -44,169 +45,75 @@ public class TreeLotCoordinator implements IView, IModel {
         }
 
         setDependencies();
-        createAndShowTransactionChoiceView();
+
+        createAndShowView("TransactionChoiceView");
     }
 
     // Dependencies between model and view subscribers
+    //------------------------------------------------------------------    
     private void setDependencies() {
         dependencies = new Properties();
 
-        closeStage = "Closing Stage";
-        dependencies.setProperty("closeStage", closeStage);
+        dependencies.setProperty("AddScout", "TransactionError");
+        dependencies.setProperty("RemoveScout", "TransactionError");
+        dependencies.setProperty("ModifyScout", "TransactionError");
+        dependencies.setProperty("AddTree", "TransactionError");
 
         myRegistry.setDependencies(dependencies);
     }
 
-    // View display logic
-    private void createAndShowTransactionChoiceView() {
-        Scene currentScene = myViews.get("TransactionChoiceView");
+    //------------------------------------------------------------------    
+    private void createAndShowView(String viewName) {
+        Scene currentScene = myViews.get(viewName);
 
         if (currentScene == null) {
-            View newView = ViewFactory.createView("TransactionChoiceView", this);
+            View newView = ViewFactory.createView(viewName, this);
             currentScene = new Scene(newView);
-            myViews.put("TransactionChoiceView", currentScene);
+            myViews.put(viewName, currentScene);
         }
 
         swapToView(currentScene);
     }
 
-    private void createAndShowAddTreeView() {
-        Scene currentScene = myViews.get("AddTreeView");
-
-        if (currentScene == null) {
-            View newView = ViewFactory.createView("AddTreeView", this);
-            currentScene = new Scene(newView);
-            myViews.put("AddTreeView", currentScene);
-        }
-
-        swapToView(currentScene);
-    }
-
-    private void createAndShowScoutView() {
-        Scene currentScene = myViews.get("ScoutView");
-
-        if (currentScene == null) {
-            View newView = ViewFactory.createView("ScoutView", this);
-            currentScene = new Scene(newView);
-            myViews.put("ScoutView", currentScene);
-        }
-
-        swapToView(currentScene);
-    }
-
-    private void createAndShowModifyScoutView(Properties scoutProps) {
-        View newView = ViewFactory.createView("ModifyScoutView", this);
-        Scene newScene = new Scene(newView);
-        myViews.put("ModifyScoutView", newScene);
-        swapToView(newScene);
-    }
-
-    private void createAndShowRemoveScoutView(Properties scoutProps) {
-        View newView = ViewFactory.createView("RemoveScoutView", this);
-        Scene newScene = new Scene(newView);
-        myViews.put("RemoveScoutView", newScene);
-        swapToView(newScene);
-    }
-
-    private void createAndShowScoutCollectionView(ScoutCollection scoutCollection) {
-        Scene currentScene = myViews.get("ScoutCollectionView");
-
-        if (currentScene == null) {
-            View newView = ViewFactory.createView("ScoutCollectionView", this);
-            currentScene = new Scene(newView);
-            myViews.put("ScoutCollectionView", currentScene);
-        }
-
-        swapToView(currentScene);
-    }
-
-    private void createAndShowScoutSearchView() {
-        Scene currentScene = myViews.get("ScoutSearchView");
-
-        if (currentScene == null) {
-            View newView = ViewFactory.createView("ScoutSearchView", this);
-            currentScene = new Scene(newView);
-            myViews.put("ScoutSearchView", currentScene);
-        }
-
-        swapToView(currentScene);
-    }
-
-    // IModel Implementation
-    @Override
-    public Object getState(String key) {
-        if (key.equals("TreeLotCoordinator")) {
-            return this;
-        }
-        else if (key.equals("ScoutList")) {
-            return sc;
-        }
-        //else if (key.equals("processScoutSelected")) {
-          //  return new
-        //}
-        else
-        return null;
-    }
-
-    @Override
-    public void subscribe(String key, IView subscriber) {
-        myRegistry.subscribe(key, subscriber);
-    }
-
-    @Override
-    public void unSubscribe(String key, IView subscriber) {
-        myRegistry.unSubscribe(key, subscriber);
-    }
-
+    //------------------------------------------------------------------ 
     @Override
     public void stateChangeRequest(String key, Object value) {
-        switch (key) {
-            case "AddTreeTransaction" -> createAndShowAddTreeView();
-            case "AddScoutTransaction" -> createAndShowScoutView();
-            case "ModifyScoutTransaction" -> createAndShowScoutSearchView(); // First show ScoutSearchView
-            case "RemoveScoutTransaction" -> createAndShowScoutSearchView(); // First show ScoutSearchView
-            case "ShowModifyScoutView" -> {
-                if (value instanceof Properties props) {
-                    createAndShowModifyScoutView(props); // Show ModifyScoutView after selection
-                }
-            }
-            case "ShowRemoveScoutView" -> {
-                if (value instanceof Properties props) {
-                    createAndShowRemoveScoutView(props); // Show RemoveScoutView after selection
-                }
-            }
-            case "CancelTransaction" -> createAndShowTransactionChoiceView();
-            case "CancelSearch" -> createAndShowTransactionChoiceView(); // Add case for cancel
-            case "SearchScouts" -> {
-                String lastName = (String) value;
-                searchScouts(lastName); // Call method to search for scouts
-            }
-            case "Done" -> myStage.close();
+        if(key.equals("done")) {
+            myStage.close();
+        }else if (key.equals("AddScoutTransaction")
+                || key.equals("ModifyScoutTransaction")
+                || key.equals("RemoveScoutTransaction")
+                || key.equals("AddTreeTransaction")){
+            doTransaction(key);
+        }else if (key.equals("CancelTransaction")){
+            createAndShowView("TransactionChoiceView");
         }
-
         myRegistry.updateSubscribers(key, this);
     }
 
-    private void searchScouts(String lastName) {
-
+    //------------------------------------------------------------------ 
+    public void doTransaction(String transactionType) {
         try{
-            sc = new ScoutCollection();
-            this.sc.findScoutsWithLastNameLike(lastName);
-            createAndShowScoutCollectionView(sc);
-        }
-        catch (Exception e){
-            System.out.println("Error fetching scouts: " + e);
-            e.printStackTrace();
+            Transaction trans = TransactionFactory.createTransaction(transactionType);
+            trans.subscribe("CancelTransaction", this);
+            trans.stateChangeRequest("DoYourJob", "");
+        }catch (Exception ex){
+            transactionErrorMessage = "FATAL ERROR: TRANSACTION FAILURE: Unrecognized transaction!!";
+            new Event(Event.getLeafLevelClassName(this), "createTransaction",
+                    "Transaction Creation Failure: Unrecognized transaction " + ex.toString(),
+                    Event.ERROR);
         }
     }
 
 
+    //------------------------------------------------------------------ 
     @Override
     public void updateState(String key, Object value) {
         stateChangeRequest(key, value);
     }
 
     // Swaps the current scene in the stage
+    //------------------------------------------------------------------ 
     public void swapToView(Scene newScene) {
         if (newScene == null) {
             System.err.println("TreeLotCoordinator.swapToView(): Missing view for display");
@@ -219,4 +126,28 @@ public class TreeLotCoordinator implements IView, IModel {
         myStage.sizeToScene();
         WindowPosition.placeCenter(myStage);
     }
+
+    // IModel Implementation
+    //------------------------------------------------------------------ 
+    @Override
+    public Object getState(String key) {
+        if(key.equals("TransactionError")) {
+            return transactionErrorMessage;
+        }else{
+            return "";
+        }
+    }
+
+    //------------------------------------------------------------------ 
+    @Override
+    public void subscribe(String key, IView subscriber) {
+        myRegistry.subscribe(key, subscriber);
+    }
+
+    //------------------------------------------------------------------ 
+    @Override
+    public void unSubscribe(String key, IView subscriber) {
+        myRegistry.unSubscribe(key, subscriber);
+    }
+
 }

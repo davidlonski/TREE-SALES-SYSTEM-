@@ -18,10 +18,18 @@ public class Scout extends EntityBase implements IView, impresario.IModel {
     protected Properties persistentState;
     private String updateStatusMessage = "";
 
+
+
+    public Scout() {
+        super(myTableName);
+
+        persistentState = new Properties();
+    }
+
     public Scout(String id) throws InvalidPrimaryKeyException {
         super(myTableName);
         setDependencies();
-        String query = "SELECT * FROM " + myTableName + " WHERE ID = '" + id + "'";
+        String query = "SELECT * FROM " + myTableName + " WHERE (ID = " + id + ")";
         Vector<Properties> result = getSelectQueryResult(query);
 
         if (result == null || result.size() != 1) {
@@ -29,13 +37,6 @@ public class Scout extends EntityBase implements IView, impresario.IModel {
         } else {
             persistentState = result.firstElement();
         }
-    }
-
-    public Scout() {
-        super(myTableName);
-        setDependencies();
-        persistentState = new Properties();
-        setDefaultStatus();
     }
 
     public Scout(Properties props) {
@@ -57,35 +58,27 @@ public class Scout extends EntityBase implements IView, impresario.IModel {
             throw new IllegalArgumentException("Last name must be 20 characters or fewer.");
         }
 
-        Enumeration<?> keys = props.propertyNames();
-        while (keys.hasMoreElements()) {
-            String key = (String) keys.nextElement();
-            String value = props.getProperty(key);
-            persistentState.setProperty(key, value);
-        }
-
-        setDefaultStatus();
-    }
-
-
-
-    private void setDefaultStatus() {
-        if (!persistentState.containsKey("Status")) {
-            persistentState.setProperty("Status", "Active");
-        }
-        if (!persistentState.containsKey("DateStatusUpdated")) {
-            persistentState.setProperty("DateStatusUpdated", new SimpleDateFormat("yyyy-MM-dd").format(new java.util.Date()));
+        Enumeration allKeys = props.propertyNames();
+        while (allKeys.hasMoreElements()) {
+            String nextKey = (String) allKeys.nextElement();
+            String value = props.getProperty(nextKey);
+            if(nextKey != null) {
+                persistentState.setProperty(nextKey, value);
+            }
         }
     }
 
     private void setDependencies() {
         dependencies = new Properties();
-        if (myRegistry != null) {
-            myRegistry.setDependencies(dependencies);
-        }
+
+        myRegistry.setDependencies(dependencies);
+
     }
 
     public Object getState(String key) {
+        if(key.equals("UpdateStatusMessage")) {
+            return updateStatusMessage;
+        }
         return persistentState.getProperty(key);
     }
 
@@ -96,48 +89,6 @@ public class Scout extends EntityBase implements IView, impresario.IModel {
     public void updateState(String key, Object value) {
         stateChangeRequest(key, value);
     }
-
-    protected void initializeSchema(String tableName) {
-        if (mySchema == null) {
-            mySchema = getSchemaInfo(tableName);
-            if (mySchema.getProperty("insertType") == null) {
-                mySchema.setProperty("insertType", "AUTOINCREMENT");
-            }
-        }
-    }
-
-    public void update() throws SQLException {
-        String id = persistentState.getProperty("ID");
-        if (id == null || id.isEmpty()) {
-            insertNewScout();
-        } else {
-            updateExistingScout(id);
-        }
-    }
-
-    private void insertNewScout() throws SQLException {
-        Properties scoutData = getStateAsProperties();
-        scoutData.remove("ID");
-        insertPersistentState(mySchema, scoutData);
-    }
-
-    private void updateExistingScout(String id) throws SQLException {
-        Properties whereClause = new Properties();
-        whereClause.setProperty("ID", id);
-        updatePersistentState(mySchema, persistentState, whereClause);
-    }
-
-    public void deleteScout() throws SQLException {
-        String id = persistentState.getProperty("ID");
-        if (id == null || id.isEmpty()) {
-            throw new SQLException("Cannot delete scout: ID is missing.");
-        }
-
-        Properties whereClause = new Properties();
-        whereClause.setProperty("ID", id);
-        deletePersistentState(mySchema, whereClause);
-    }
-
 
     private Properties getStateAsProperties() {
         Properties data = new Properties();
@@ -158,6 +109,38 @@ public class Scout extends EntityBase implements IView, impresario.IModel {
         persistentState.setProperty(key, value);
     }
 
+    public void save() {
+        updateStateInDatabase();
+    }
+
+    private void updateStateInDatabase(){
+        try
+        {
+            if (persistentState.getProperty("ID") != null)
+            {
+                // update
+                Properties whereClause = new Properties();
+                whereClause.setProperty("ID",
+                        persistentState.getProperty("ID"));
+                updatePersistentState(mySchema, persistentState, whereClause);
+                updateStatusMessage = "Scout data for scout ID : " + persistentState.getProperty("ID") + " updated successfully in database!";
+            }
+            else
+            {
+                // insert
+                Integer ID =
+                        insertAutoIncrementalPersistentState(mySchema, persistentState);
+                persistentState.setProperty("ID", "" + ID);
+                updateStatusMessage = "Scout data for new scout ID : " +  persistentState.getProperty("ID")
+                        + " installed successfully in database!";
+            }
+        }
+        catch (SQLException ex)
+        {
+            updateStatusMessage = "Error in installing scout data in database!";
+        }
+    }
+
     public Vector<String> getEntryListView() {
         Vector<String> view = new Vector<>();
         view.add(persistentState.getProperty("ID"));
@@ -173,6 +156,16 @@ public class Scout extends EntityBase implements IView, impresario.IModel {
         return view;
     }
 
+
+    protected void initializeSchema(String tableName) {
+        if (mySchema == null) {
+            mySchema = getSchemaInfo(tableName);
+            if (mySchema.getProperty("insertType") == null) {
+                mySchema.setProperty("insertType", "AUTOINCREMENT");
+            }
+        }
+    }
+
     @Override
     public String toString() {
         return "Scout ID: " + getState("ID") +
@@ -183,5 +176,9 @@ public class Scout extends EntityBase implements IView, impresario.IModel {
                 ", TroopID: " + getState("TroopID") +
                 ", Status: " + getState("Status") +
                 ", Status Updated: " + getState("DateStatusUpdated");
+    }
+
+    public void display(){
+        System.out.println(this.toString());
     }
 }

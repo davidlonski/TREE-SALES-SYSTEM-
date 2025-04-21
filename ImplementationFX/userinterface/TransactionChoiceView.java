@@ -169,13 +169,13 @@ public class TransactionChoiceView extends View {
 
     @Override
     public void updateState(String key, Object value) {
-        if (key.equals("addScoutTransactionError")==true){
+        if (key.equals("addScoutTransactionError")){
             displayErrorMessage((String)value);
-        } else if(key.equals("modifyScoutTransactionError")==true){
+        } else if(key.equals("modifyScoutTransactionError")){
             displayErrorMessage((String)value);
-        } else if(key.equals("removeScoutTransactionError")==true){
+        } else if(key.equals("removeScoutTransactionError")){
             displayErrorMessage((String)value);
-        } else if(key.equals("addTreeTransactionError")==true){
+        } else if(key.equals("addTreeTransactionError")){
             displayErrorMessage((String)value);
         }
     }

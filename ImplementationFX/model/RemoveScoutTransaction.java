@@ -58,6 +58,7 @@ public class RemoveScoutTransaction implements IModel, IView {
     }
 
     private void processRemoval() {
+        /*
         if (selectedScoutProps == null || selectedScoutProps.getProperty("scoutID") == null) {
             transactionStatusMessage = "ERROR: No Scout selected for removal.";
             return;
@@ -73,6 +74,7 @@ public class RemoveScoutTransaction implements IModel, IView {
         } catch (SQLException e) {
             transactionStatusMessage = "ERROR: Database error: " + e.getMessage();
         }
+        */
     }
 
     private void createAndShowScoutSearchView() {

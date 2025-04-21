@@ -20,21 +20,21 @@ public class TransactionFactory
 	{
 		Transaction retValue = null;
 
-		if (transType.equals("AddScout") == true)
+		if (transType.equals("AddScoutTransaction"))
 		{
 			retValue = new AddScoutTransaction();
 		}
-		else if (transType.equals("ModifyScout") == true)
+		else if (transType.equals("ModifyScoutTransaction"))
 		{
-			retValue = new ModifyScoutTransaction();
+			//retValue = new ModifyScoutTransaction();
 		}
-		else if (transType.equals("RemoveScout") == true)
+		else if (transType.equals("RemoveScoutTransaction"))
 		{
-			retValue = new RemoveScoutTransaction();
+			//retValue = new RemoveScoutTransaction();
 		}
-		else if (transType.equals("AddTree") == true)
+		else if (transType.equals("AddTreeTransaction"))
 		{
-			retValue = new AddTreeTransaction();
+			//retValue = new AddTreeTransaction();
 		}
 
 		return retValue;

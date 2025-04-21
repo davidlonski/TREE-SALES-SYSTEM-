@@ -53,7 +53,7 @@ public class ModifyScoutTransaction extends EntityBase implements IModel, IView 
     }
 
     public void processTransaction(Properties props) {
-        String scoutId = props.getProperty("ID");
+        /*String scoutId = props.getProperty("ID");
 
         if (scoutId == null || scoutId.trim().isEmpty()) {
             transactionStatusMessage = "ERROR: No Scout ID provided.";
@@ -74,7 +74,7 @@ public class ModifyScoutTransaction extends EntityBase implements IModel, IView 
                         new SimpleDateFormat("yyyy-MM-dd").format(new Date()));
             }
 
-            scoutToModify.update();
+            //scoutToModify.update();
             transactionStatusMessage = "Scout successfully updated.";
         } catch (InvalidPrimaryKeyException e) {
             transactionStatusMessage = "ERROR: Scout not found with ID: " + scoutId;
@@ -83,6 +83,8 @@ public class ModifyScoutTransaction extends EntityBase implements IModel, IView 
         }
 
         updateSubscribers("TransactionStatusMessage", this);
+
+         */
     }
 
     private void createAndShowScoutSearchView() {

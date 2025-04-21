@@ -18,110 +18,69 @@ import userinterface.View;
 import userinterface.ViewFactory;
 import userinterface.WindowPosition;
 
-public class AddScoutTransaction implements IView, IModel {
-    private Properties dependencies;
-    private ModelRegistry myRegistry;
+public class AddScoutTransaction extends Transaction {
+    private Scout newScout;
 
-    private Hashtable<String, Scene> myViews;
-    private Stage myStage;
+    private String insertSuccessful;
 
-    private String loginErrorMessage;
-    private String transactionErrorMessage;
-    private String successMessage;
-    //private ScoutCollection scoutCollection
-
-    public AddScoutTransaction()
-    {
-        myStage = MainStageContainer.getInstance();
-        myViews = new Hashtable<String, Scene>();
-
-        myRegistry = new ModelRegistry("AddScoutTransaction");
-        //scoutCollection = new ScoutCollection();
-
-        if(myRegistry == null){
-            new Event(Event.getLeafLevelClassName(this), "AddScoutTransaction",
-                    "Could not instantiate Registry", Event.ERROR);
-
-        }
-        setDependencies();
-
-
+    public AddScoutTransaction() throws Exception{
+        super();
     }
 
-    private void setDependencies() {
+    protected void setDependencies(){
         dependencies = new Properties();
-        dependencies.setProperty("loginErrorMessage", loginErrorMessage);
-        dependencies.setProperty("successMessage", successMessage);
-        dependencies.setProperty("transactionErrorMessage", transactionErrorMessage);
+
+        insertSuccessful = "Successfully added scout to the database";
+
+        dependencies.setProperty("InsertSuccessful", insertSuccessful);
 
         myRegistry.setDependencies(dependencies);
     }
 
+    private void processTransaction(Properties props) {
+        // Business logic
+        newScout = new Scout(props);
+        newScout.save();
 
-
-
-
-    public Object getState(String key)
-    {
-        /** if(key.equals("ScoutCollection")){
-            return scoutCollection;
-        } */
-
-        return "";
+        insertSuccessful = "Successfully added scout to the database";
+        myRegistry.updateSubscribers("InsertSuccessful", this);
     }
 
-    public void updateState(String key, Object value)
-    {
-        // DEBUG System.out.println("Teller.updateState: key: " + key);
-
-        stateChangeRequest(key, value);
+    public Object getState(String key){
+        return switch (key) {
+            case "InsertSuccessful" -> insertSuccessful;
+            default -> "";
+        };
     }
 
-    /** Register objects to receive state updates. */
-    //----------------------------------------------------------
-    public void subscribe(String key, IView subscriber) {
+    public void stateChangeRequest(String key, Object value){
+        if (key.equals("DoYourJob")){
+            doYourJob();
+        }else if(key.equals("ProcessScoutTransaction")){
+            processTransaction((Properties) value);
+        }else if(key.equals("CancelAddScoutTransaction")){
+            stateChangeRequest("CancelTransaction", null);
+        }
 
+        myRegistry.updateSubscribers(key, this);
     }
 
-    /** Unregister previously registered objects. */
-    //----------------------------------------------------------
-    public void unSubscribe(String key, IView subscriber) {
 
-    }
+    protected Scene createView(){
+        Scene currentScene = myViews.get("AddScoutView");
 
-    public void stateChangeRequest(String key, Object value) {
-        if(key.equals("Done")){
-            //CreateTreeLotCoordinator();
-        }else if(key.equals("AddScout")){
-            Scout scout = new Scout();
+        if(currentScene == null){
+            View newView = ViewFactory.createView("AddScoutView", this);
+            currentScene = new Scene(newView);
+            myViews.put("AddScoutView", currentScene);
 
-            Scene currentScene = (Scene)myViews.get("ScoutView");
+            return currentScene;
 
-            if(currentScene != null){
-                View newView = ViewFactory.createView("ScoutView", this);
-                currentScene = new Scene(newView);
-                myViews.put("ScoutView", currentScene);
-            }
-
-            swapToView(currentScene);
+        }else{
+            return currentScene;
         }
     }
 
-    public void swapToView(Scene newScene)
-    {
 
 
-        if (newScene == null)
-        {
-            System.out.println("Teller.swapToView(): Missing view for display");
-            new Event(Event.getLeafLevelClassName(this), "swapToView",
-                    "Missing view for display ", Event.ERROR);
-            return;
-        }
-
-        myStage.setScene(newScene);
-        myStage.sizeToScene();
-
-        WindowPosition.placeCenter(myStage);
-    }
 }
