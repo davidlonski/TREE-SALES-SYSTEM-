@@ -78,7 +78,7 @@ public class TreeLotCoordinator implements IView, IModel {
     //------------------------------------------------------------------ 
     @Override
     public void stateChangeRequest(String key, Object value) {
-        if(key.equals("done")) {
+        if(key.equals("Done")) {
             myStage.close();
         }else if (key.equals("AddScoutTransaction")
                 || key.equals("ModifyScoutTransaction")
