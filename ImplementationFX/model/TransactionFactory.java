@@ -30,7 +30,7 @@ public class TransactionFactory
 		}
 		else if (transType.equals("RemoveScoutTransaction"))
 		{
-			//retValue = new RemoveScoutTransaction();
+			retValue = new RemoveScoutTransaction();
 		}
 		else if (transType.equals("AddTreeTransaction"))
 		{
