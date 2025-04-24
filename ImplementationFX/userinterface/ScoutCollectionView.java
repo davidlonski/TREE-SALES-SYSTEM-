@@ -3,6 +3,7 @@ package userinterface;
 import impresario.IModel;
 import javafx.collections.*;
 import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.geometry.*;
 import javafx.scene.Node;
 import javafx.scene.Scene;
@@ -22,9 +23,11 @@ public class ScoutCollectionView extends View {
     protected TableView<ScoutTableModel> tableOfScouts;
     protected Button submitButton, cancelButton;
     private MessageView statusLog;
+    private String mode; // "Modify" or "Remove"
 
-    public ScoutCollectionView(IModel model) {
+    public ScoutCollectionView(IModel model, String mode) {
         super(model, "ScoutCollectionView");
+        this.mode = mode;
 
         VBox container = new VBox(10);
         container.setPadding(new Insets(15, 5, 5, 5));
@@ -46,7 +49,6 @@ public class ScoutCollectionView extends View {
         try {
             ScoutCollection scoutCollection = (ScoutCollection) myModel.getState("ScoutList");
             Vector<Scout> entryList = (Vector<Scout>) scoutCollection.getState("Scouts");
-            Enumeration entries = entryList.elements();
 
             tableOfScouts.getItems().clear();
 
@@ -109,17 +111,30 @@ public class ScoutCollectionView extends View {
                 phoneCol, emailCol, troopIdCol, statusCol, statusDateCol
         );
 
-        tableOfScouts.setOnMousePressed((MouseEvent event) -> {
-            if (event.isPrimaryButtonDown() && event.getClickCount() >= 2) {
-                processScoutSelected();
+        tableOfScouts.setOnMousePressed(new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent event) {
+                if (event.isPrimaryButtonDown() && event.getClickCount() >= 2) {
+                    processScoutSelected();
+                }
             }
         });
 
         submitButton = new Button("Select");
-        submitButton.setOnAction(e -> myModel.stateChangeRequest("processScoutSelected", null));
+        submitButton.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent e) {
+                processScoutSelected();
+            }
+        });
 
         cancelButton = new Button("Back");
-        cancelButton.setOnAction((ActionEvent e) -> myModel.stateChangeRequest("CancelScoutList", null));
+        cancelButton.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent e) {
+                myModel.stateChangeRequest("CancelScoutList", null);
+            }
+        });
 
         HBox btnBox = new HBox(20, submitButton, cancelButton);
         btnBox.setAlignment(Pos.CENTER);
@@ -128,11 +143,14 @@ public class ScoutCollectionView extends View {
         return vbox;
     }
 
-
     protected void processScoutSelected() {
         ScoutTableModel selected = tableOfScouts.getSelectionModel().getSelectedItem();
         if (selected != null) {
-            myModel.stateChangeRequest("ScoutSelected", selected.getScoutId());
+            if ("Remove".equals(mode)) {
+                myModel.stateChangeRequest("RemoveScout", selected.getScoutId());
+            } else {
+                myModel.stateChangeRequest("ScoutSelected", selected.getScoutId());
+            }
         } else {
             displayErrorMessage("No scout selected.");
         }
@@ -153,7 +171,7 @@ public class ScoutCollectionView extends View {
 
     @Override
     public void updateState(String key, Object value) {
-        if (key.equals("ScoutListUpdated")) {
+        if ("ScoutListUpdated".equals(key)) {
             getEntryTableModelValues();
         }
     }
@@ -162,9 +180,7 @@ public class ScoutCollectionView extends View {
     public Scene createScene() {
         VBox container = new VBox(10);
         container.setPadding(new Insets(15, 5, 5, 5));
-
         container.getChildren().addAll(createTitle(), createFormContent(), createStatusLog(""));
-
         return new Scene(container, 600, 400);
     }
 }

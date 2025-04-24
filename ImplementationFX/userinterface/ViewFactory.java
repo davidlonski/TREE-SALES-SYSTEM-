@@ -25,7 +25,7 @@ public class ViewFactory {
 			return new RemoveScoutView(model, null);
 		}
 		else if (viewName.equals("ScoutCollectionView")) {
-			return new ScoutCollectionView(model);
+			return new ScoutCollectionView(model, null);
 		}
 		else if (viewName.equals("ScoutSearchView")) {
 			return new ScoutSearchView(model); // This is the search view we want to show before displaying the ScoutCollectionView.
