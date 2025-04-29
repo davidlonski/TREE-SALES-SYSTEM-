@@ -1,144 +1,233 @@
 package model;
 
-import impresario.IModel;
-import impresario.IView;
-import exception.InvalidPrimaryKeyException;
-import userinterface.ViewFactory;
-
+import javafx.scene.Scene;
+import java.util.Properties;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.Date;
 
-public class ModifyScoutTransaction extends EntityBase implements IModel, IView {
+import event.Event;
+import exception.InvalidPrimaryKeyException;
+import userinterface.View;
+import userinterface.ViewFactory;
 
-    private Scout scoutToModify;
+public class ModifyScoutTransaction extends Transaction {
+
     private ScoutCollection scoutCollection;
-    private String transactionStatusMessage = "";
-    private Hashtable<String, Vector<IView>> subscribers = new Hashtable<>();
+    private Scout scoutToModify;
+    private String transactionErrorMessage = "";
+    private String transactionSuccessMessage = "";
 
-    public ModifyScoutTransaction() {
-        super("Scout");
+    /**
+     * Constructor for this class.
+     */
+    public ModifyScoutTransaction() throws Exception {
+        super();
     }
 
+    /**
+     * Set dependencies for this transaction
+     */
+    @Override
+    protected void setDependencies() {
+        dependencies = new Properties();
+        dependencies.setProperty("TransactionStatusMessage", "");
+        myRegistry.setDependencies(dependencies);
+    }
+
+    /**
+     * Create the view for this transaction
+     */
+    @Override
+    protected Scene createView() {
+        Scene currentScene = myViews.get("ScoutSearchView");
+
+        if (currentScene == null) {
+            // Create the initial search view
+            View newView = ViewFactory.createView("ScoutSearchView", this);
+            currentScene = new Scene(newView);
+            myViews.put("ScoutSearchView", currentScene);
+        }
+
+        return currentScene;
+    }
+
+    /**
+     * Process events generated from views
+     */
     @Override
     public void stateChangeRequest(String key, Object value) {
-        switch (key) {
-            case "DoYourJob":
-                createAndShowScoutSearchView();
-                break;
+        System.out.println("ModifyScoutTransaction: Received key = " + key);
 
-            case "SearchScouts":
-                try {
-                    String namePart = (String) value;
-                    scoutCollection = new ScoutCollection();
-                    scoutCollection.findScoutsWithLastNameLike(namePart);
-                    createAndShowScoutCollectionView();
-                } catch (Exception e) {
-                    transactionStatusMessage = "ERROR: Could not retrieve scout data: " + e.getMessage();
-                    updateSubscribers("TransactionStatusMessage", this);
-                }
-                break;
-
-            case "ScoutSelected":
-                scoutToModify = new Scout((Properties) value);
-                createAndShowModifyScoutView();
-                break;
-
-            case "ModifyScout":
-                processTransaction((Properties) value);
-                break;
+        if (key.equals("DoYourJob")) {
+            doYourJob();
+        } else if (key.equals("SearchScouts")) {
+            searchScouts((String) value);
+        } else if (key.equals("ScoutSelected")) {
+            String scoutId = (String) value;
+            scoutSelected(scoutId);
+        } else if (key.equals("ModifyScoutData")) {
+            processModification((Properties) value);
+        } else if (key.equals("CancelModifyScout")) {
+            // Go back to scout collection view
+            createAndShowScoutCollectionView();
+        } else if (key.equals("CancelScoutList")) {
+            // Go back to search view
+            createAndShowScoutSearchView();
+        } else if (key.equals("CancelSearch")) {
+            // Cancel the entire transaction
+            myRegistry.updateSubscribers("CancelTransaction", this);
         }
-
-        updateSubscribers(key, this);
     }
 
-    public void processTransaction(Properties props) {
-        /*String scoutId = props.getProperty("ID");
-
-        if (scoutId == null || scoutId.trim().isEmpty()) {
-            transactionStatusMessage = "ERROR: No Scout ID provided.";
-            return;
-        }
-
+    /**
+     * Search for scouts with the given last name
+     */
+    private void searchScouts(String lastName) {
         try {
+            scoutCollection = new ScoutCollection();
+            scoutCollection.findScoutsWithLastNameLike(lastName);
+            createAndShowScoutCollectionView();
+        } catch (Exception e) {
+            transactionErrorMessage = "ERROR: Could not complete scout search: " + e.getMessage();
+            new Event(Event.getLeafLevelClassName(this), "searchScouts",
+                    "Error searching for scouts: " + e.getMessage(), Event.ERROR);
+            myRegistry.updateSubscribers("TransactionStatusMessage", this);
+        }
+    }
+
+    /**
+     * Handle when a scout is selected from the collection
+     */
+    private void scoutSelected(String scoutId) {
+        try {
+            System.out.println("ModifyScoutTransaction: Scout ID selected = " + scoutId);
             scoutToModify = new Scout(scoutId);
-
-            for (String key : props.stringPropertyNames()) {
-                if (!key.equals("ID")) {
-                    scoutToModify.setState(key, props.getProperty(key));
-                }
-            }
-
-            if (props.containsKey("Status")) {
-                scoutToModify.setState("DateStatusUpdated",
-                        new SimpleDateFormat("yyyy-MM-dd").format(new Date()));
-            }
-
-            //scoutToModify.update();
-            transactionStatusMessage = "Scout successfully updated.";
+            createAndShowModifyScoutView();
         } catch (InvalidPrimaryKeyException e) {
-            transactionStatusMessage = "ERROR: Scout not found with ID: " + scoutId;
-        } catch (SQLException e) {
-            transactionStatusMessage = "ERROR: Database error while updating Scout: " + e.getMessage();
+            transactionErrorMessage = "ERROR: Scout with ID " + scoutId + " not found.";
+            myRegistry.updateSubscribers("TransactionStatusMessage", this);
+        }
+    }
+
+    /**
+     * Process the modification of the selected scout
+     */
+    private void processModification(Properties props) {
+        try {
+            // Get the scout ID
+            String scoutId = (String)scoutToModify.getState("ID");
+
+            // Update the scout properties
+            for (String propertyName : props.stringPropertyNames()) {
+                scoutToModify.setState(propertyName, props.getProperty(propertyName));
+            }
+
+            // Update the status date if status was changed
+            String oldStatus = (String)scoutToModify.getState("Status");
+            String newStatus = props.getProperty("status");
+            if (newStatus != null && !newStatus.equals(oldStatus)) {
+                scoutToModify.setState("DateStatusUpdated",
+                        new SimpleDateFormat("MM-dd-yyyy").format(new Date()));
+            }
+
+            // Save to database
+            scoutToModify.save();
+
+            // Create success message
+            String scoutName = (String)scoutToModify.getState("FirstName") + " " +
+                    (String)scoutToModify.getState("LastName");
+            transactionSuccessMessage = "Scout " + scoutName + " (ID: " + scoutId + ") has been successfully updated!";
+
+            // Go back to transaction choice view
+            myRegistry.updateSubscribers("TransactionStatusMessage", this);
+            myRegistry.updateSubscribers("CancelTransaction", this);
+
+        } catch (Exception e) {
+            transactionErrorMessage = "ERROR: Error updating scout: " + e.getMessage();
+            myRegistry.updateSubscribers("TransactionStatusMessage", this);
+        }
+    }
+
+    /**
+     * Create and show the scout search view
+     */
+    private void createAndShowScoutSearchView() {
+        Scene currentScene = myViews.get("ScoutSearchView");
+
+        if (currentScene == null) {
+            View newView = ViewFactory.createView("ScoutSearchView", this);
+            currentScene = new Scene(newView);
+            myViews.put("ScoutSearchView", currentScene);
         }
 
-        updateSubscribers("TransactionStatusMessage", this);
-
-         */
+        swapToView(currentScene);
     }
 
-    private void createAndShowScoutSearchView() {
-        ViewFactory.createView("ScoutSearchView", this);
-    }
-
+    /**
+     * Create and show the scout collection view
+     */
     private void createAndShowScoutCollectionView() {
-        ViewFactory.createView("ScoutCollectionView", scoutCollection);
+        Scene currentScene = myViews.get("ScoutCollectionView");
+
+        if (currentScene == null) {
+            View newView = ViewFactory.createView("ScoutCollectionView", this);
+            currentScene = new Scene(newView);
+            myViews.put("ScoutCollectionView", currentScene);
+        }
+
+        swapToView(currentScene);
     }
 
+    /**
+     * Create and show the modify scout view
+     */
     private void createAndShowModifyScoutView() {
-        ViewFactory.createView("ModifyScoutView", scoutToModify);
+        Scene currentScene = myViews.get("ModifyScoutView");
+
+        if (currentScene == null) {
+            // Convert Scout data to Properties to pass to the ModifyScoutView
+            Properties scoutProps = new Properties();
+            scoutProps.setProperty("scoutID", (String)scoutToModify.getState("ID"));
+            scoutProps.setProperty("firstName", (String)scoutToModify.getState("FirstName"));
+            scoutProps.setProperty("lastName", (String)scoutToModify.getState("LastName"));
+            scoutProps.setProperty("middleName", (String)scoutToModify.getState("MiddleName"));
+            scoutProps.setProperty("dateOfBirth", (String)scoutToModify.getState("DateOfBirth"));
+            scoutProps.setProperty("phoneNumber", (String)scoutToModify.getState("PhoneNumber"));
+            scoutProps.setProperty("email", (String)scoutToModify.getState("Email"));
+            scoutProps.setProperty("troopID", (String)scoutToModify.getState("TroopID"));
+            scoutProps.setProperty("status", (String)scoutToModify.getState("Status"));
+            scoutProps.setProperty("datestatus", (String)scoutToModify.getState("DateStatusUpdated"));
+
+            View newView = new userinterface.ModifyScoutView(this, scoutProps);
+            currentScene = new Scene(newView);
+            myViews.put("ModifyScoutView", currentScene);
+        }
+
+        swapToView(currentScene);
     }
 
+    /**
+     * Return the object state for a given key
+     */
+    @Override
     public Object getState(String key) {
-        if ("TransactionStatusMessage".equals(key)) {
-            return transactionStatusMessage;
-        } else if (scoutToModify != null) {
-            return scoutToModify.getState(key);
+        if (key.equals("TransactionErrorMessage")) {
+            return transactionErrorMessage;
+        } else if (key.equals("TransactionStatusMessage")) {
+            if (!transactionSuccessMessage.isEmpty()) {
+                return transactionSuccessMessage;
+            } else if (!transactionErrorMessage.isEmpty()) {
+                return transactionErrorMessage;
+            }
+            return "";
+        } else if (key.equals("ScoutList")) {
+            return scoutCollection;
+        } else if (key.equals("Scout") && scoutToModify != null) {
+            return scoutToModify;
+        } else if (key.equals("Scouts") && scoutCollection != null) {
+            return scoutCollection.getState("Scouts");
         }
         return null;
-    }
-
-    public void updateState(String key, Object value) {
-        stateChangeRequest(key, value);
-    }
-
-    public void subscribe(String key, IView subscriber) {
-        Vector<IView> subs = subscribers.computeIfAbsent(key, k -> new Vector<>());
-        if (!subs.contains(subscriber)) {
-            subs.add(subscriber);
-        }
-    }
-
-    public void unSubscribe(String key, IView subscriber) {
-        Vector<IView> subs = subscribers.get(key);
-        if (subs != null) {
-            subs.remove(subscriber);
-        }
-    }
-
-    public void updateSubscribers(String key, Object value) {
-        Vector<IView> subs = subscribers.get(key);
-        if (subs != null) {
-            for (IView view : subs) {
-                view.updateState(key, value);
-            }
-        }
-    }
-
-    @Override
-    protected void initializeSchema(String tableName) {
-        if (mySchema == null) {
-            mySchema = getSchemaInfo(tableName);
-        }
     }
 }

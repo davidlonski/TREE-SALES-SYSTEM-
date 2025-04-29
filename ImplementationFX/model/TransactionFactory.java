@@ -26,7 +26,7 @@ public class TransactionFactory
 		}
 		else if (transType.equals("ModifyScoutTransaction"))
 		{
-			//retValue = new ModifyScoutTransaction();
+			retValue = new ModifyScoutTransaction();
 		}
 		else if (transType.equals("RemoveScoutTransaction"))
 		{
