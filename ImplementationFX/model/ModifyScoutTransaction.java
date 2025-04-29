@@ -1,10 +1,15 @@
 package model;
 
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
+import javafx.scene.control.ButtonType;
+import javafx.application.Platform;
 import java.util.Properties;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Optional;
 
 import event.Event;
 import exception.InvalidPrimaryKeyException;
@@ -115,38 +120,107 @@ public class ModifyScoutTransaction extends Transaction {
      */
     private void processModification(Properties props) {
         try {
-            // Get the scout ID
+            System.out.println("DEBUG: Processing scout modification with properties: " + props);
+
+            // Get the scout ID for messages
             String scoutId = (String)scoutToModify.getState("ID");
+            System.out.println("DEBUG: Modifying scout with ID: " + scoutId);
 
-            // Update the scout properties
-            for (String propertyName : props.stringPropertyNames()) {
-                scoutToModify.setState(propertyName, props.getProperty(propertyName));
-            }
+            // Map form field names to database field names
+            // This is critical if the field names in the form don't match the database field names
+            Properties dbFieldProps = new Properties();
+            dbFieldProps.setProperty("ID", scoutId); // Preserve the ID
 
-            // Update the status date if status was changed
+            // Map the form field names to database field names
+            if (props.getProperty("firstName") != null)
+                dbFieldProps.setProperty("FirstName", props.getProperty("firstName"));
+
+            if (props.getProperty("middleName") != null)
+                dbFieldProps.setProperty("MiddleName", props.getProperty("middleName"));
+
+            if (props.getProperty("lastName") != null)
+                dbFieldProps.setProperty("LastName", props.getProperty("lastName"));
+
+            if (props.getProperty("dateOfBirth") != null)
+                dbFieldProps.setProperty("DateOfBirth", props.getProperty("dateOfBirth"));
+
+            if (props.getProperty("phoneNumber") != null)
+                dbFieldProps.setProperty("PhoneNumber", props.getProperty("phoneNumber"));
+
+            if (props.getProperty("email") != null)
+                dbFieldProps.setProperty("Email", props.getProperty("email"));
+
+            if (props.getProperty("troopID") != null)
+                dbFieldProps.setProperty("TroopID", props.getProperty("troopID"));
+
+            if (props.getProperty("status") != null)
+                dbFieldProps.setProperty("Status", props.getProperty("status"));
+
+            // Update DateStatusUpdated if status changed
             String oldStatus = (String)scoutToModify.getState("Status");
             String newStatus = props.getProperty("status");
             if (newStatus != null && !newStatus.equals(oldStatus)) {
-                scoutToModify.setState("DateStatusUpdated",
-                        new SimpleDateFormat("MM-dd-yyyy").format(new Date()));
+                String today = new SimpleDateFormat("MM-dd-yyyy").format(new Date());
+                dbFieldProps.setProperty("DateStatusUpdated", today);
+                System.out.println("DEBUG: Status changed, updating DateStatusUpdated to " + today);
+            } else if (props.getProperty("datestatus") != null) {
+                dbFieldProps.setProperty("DateStatusUpdated", props.getProperty("datestatus"));
             }
 
-            // Save to database
-            scoutToModify.save();
+            // Create a new Scout with the modified properties
+            Scout updatedScout = new Scout(dbFieldProps);
+
+            // Display the scout before and after modification for debugging
+            System.out.println("DEBUG: Before modification:");
+            scoutToModify.display();
+            System.out.println("DEBUG: After modification:");
+            updatedScout.display();
+
+            // Save the changes to the database
+            updatedScout.save();
 
             // Create success message
-            String scoutName = (String)scoutToModify.getState("FirstName") + " " +
-                    (String)scoutToModify.getState("LastName");
+            String scoutName = dbFieldProps.getProperty("FirstName") + " " +
+                    dbFieldProps.getProperty("LastName");
             transactionSuccessMessage = "Scout " + scoutName + " (ID: " + scoutId + ") has been successfully updated!";
+            System.out.println("DEBUG: " + transactionSuccessMessage);
 
-            // Go back to transaction choice view
-            myRegistry.updateSubscribers("TransactionStatusMessage", this);
-            myRegistry.updateSubscribers("CancelTransaction", this);
+            // Show success notification with Done button
+            showSuccessNotification(scoutName, scoutId);
 
         } catch (Exception e) {
+            e.printStackTrace();
             transactionErrorMessage = "ERROR: Error updating scout: " + e.getMessage();
+            System.out.println("DEBUG: " + transactionErrorMessage);
             myRegistry.updateSubscribers("TransactionStatusMessage", this);
         }
+    }
+
+    /**
+     * Display a success notification with a Done button
+     */
+    private void showSuccessNotification(String scoutName, String scoutId) {
+        // Use Platform.runLater to ensure this runs on the JavaFX thread
+        Platform.runLater(() -> {
+            Alert alert = new Alert(AlertType.INFORMATION);
+            alert.setTitle("Update Successful");
+            alert.setHeaderText("Scout Updated Successfully");
+            alert.setContentText("Scout " + scoutName + " (ID: " + scoutId + ") has been successfully updated!");
+
+            // Replace OK button with a Done button
+            ButtonType doneButton = new ButtonType("Done");
+            alert.getButtonTypes().setAll(doneButton);
+
+            // Show the alert and wait for response
+            Optional<ButtonType> result = alert.showAndWait();
+
+            // When Done button is clicked, return to main interface
+            if (result.isPresent() && result.get() == doneButton) {
+                // Return to main menu
+                myRegistry.updateSubscribers("TransactionStatusMessage", this);
+                myRegistry.updateSubscribers("CancelTransaction", this);
+            }
+        });
     }
 
     /**

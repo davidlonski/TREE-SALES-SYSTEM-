@@ -1,8 +1,13 @@
 package model;
 
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
+import javafx.scene.control.ButtonType;
+import javafx.application.Platform;
 import java.util.Properties;
 import java.sql.SQLException;
+import java.util.Optional;
 
 import event.Event;
 import exception.InvalidPrimaryKeyException;
@@ -97,6 +102,7 @@ public class RemoveScoutTransaction extends Transaction {
      */
     private void scoutSelected(String scoutId) {
         try {
+            System.out.println("DEBUG: RemoveScoutTransaction - Scout selected with ID: " + scoutId);
             scoutToRemove = new Scout(scoutId);
             createAndShowRemoveScoutView();
         } catch (InvalidPrimaryKeyException e) {
@@ -115,20 +121,46 @@ public class RemoveScoutTransaction extends Transaction {
             String scoutName = (String)scoutToRemove.getState("FirstName") + " " +
                     (String)scoutToRemove.getState("LastName");
 
-            // Delete scout using the Scout object's method
+            // Delete scout using the Scout's method
             scoutToRemove.deleteScout();
 
             // Show success message
             transactionSuccessMessage = "Scout " + scoutName + " (ID: " + scoutId + ") has been successfully removed!";
 
-            // Go back to transaction choice view
-            myRegistry.updateSubscribers("TransactionStatusMessage", this);
-            myRegistry.updateSubscribers("CancelTransaction", this);
+            // Show success notification with Done button
+            showSuccessNotification(scoutName, scoutId);
 
         } catch (SQLException e) {
             transactionErrorMessage = "ERROR: Database error while removing scout: " + e.getMessage();
             myRegistry.updateSubscribers("TransactionStatusMessage", this);
         }
+    }
+
+    /**
+     * Display a success notification with a Done button
+     */
+    private void showSuccessNotification(String scoutName, String scoutId) {
+        // Use Platform.runLater to ensure this runs on the JavaFX thread
+        Platform.runLater(() -> {
+            Alert alert = new Alert(AlertType.INFORMATION);
+            alert.setTitle("Removal Successful");
+            alert.setHeaderText("Scout Removed Successfully");
+            alert.setContentText("Scout " + scoutName + " (ID: " + scoutId + ") has been successfully removed from the database.");
+
+            // Replace OK button with a Done button
+            ButtonType doneButton = new ButtonType("Done");
+            alert.getButtonTypes().setAll(doneButton);
+
+            // Show the alert and wait for response
+            Optional<ButtonType> result = alert.showAndWait();
+
+            // When Done button is clicked, return to main interface
+            if (result.isPresent() && result.get() == doneButton) {
+                // Return to main menu
+                myRegistry.updateSubscribers("TransactionStatusMessage", this);
+                myRegistry.updateSubscribers("CancelTransaction", this);
+            }
+        });
     }
 
     /**
