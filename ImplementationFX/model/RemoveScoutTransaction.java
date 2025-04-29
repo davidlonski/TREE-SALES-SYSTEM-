@@ -122,7 +122,7 @@ public class RemoveScoutTransaction extends Transaction {
                     (String)scoutToRemove.getState("LastName");
 
             // Delete scout using the Scout's method
-            scoutToRemove.deleteScout();
+            scoutToRemove.setInactive();
 
             // Show success message
             transactionSuccessMessage = "Scout " + scoutName + " (ID: " + scoutId + ") has been successfully removed!";
