@@ -178,18 +178,20 @@ public class Scout extends EntityBase implements IView, impresario.IModel {
                 ", Status Updated: " + getState("DateStatusUpdated");
     }
 
-    public void deleteScout() throws SQLException {
-        String id = (String)getState("ID");
-        if (id == null || id.isEmpty()) {
-            throw new SQLException("Cannot delete scout: ID is missing.");
-        }
-
-        Properties whereClause = new Properties();
-        whereClause.setProperty("ID", id);
-        deletePersistentState(mySchema, whereClause);
-    }
-
     public void display(){
         System.out.println(this.toString());
+    }
+
+    public void setInactive() throws SQLException {
+        // Set status to Inactive
+        setState("Status", "Inactive");
+        
+        // Set the current date as the status update date
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        String currentDate = dateFormat.format(new java.util.Date());
+        setState("DateStatusUpdated", currentDate);
+        
+        // Save changes to database
+        save();
     }
 }

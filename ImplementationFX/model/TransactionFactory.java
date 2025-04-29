@@ -36,6 +36,18 @@ public class TransactionFactory
 		{
 			//retValue = new AddTreeTransaction();
 		}
+		else if (transType.equals("ModifyTreeTransaction"))
+		{
+			//retValue = new ModifyTreeTransaction();
+		}
+		else if (transType.equals("RemoveTreeTransaction"))
+		{
+			//retValue = new RemoveTreeTransaction();
+		}
+		else if (transType.equals("AddTreeTypeTransaction"))
+		{
+			//retValue = new AddTreeTypeTransaction();
+		}
 
 		return retValue;
 	}
