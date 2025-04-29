@@ -3,117 +3,67 @@ package model;
 import java.util.Hashtable;
 import java.util.Properties;
 
-import com.sun.tools.javac.Main;
-import javafx.stage.Stage;
 import javafx.scene.Scene;
+import javafx.stage.Stage;
 
-// project imports
 import impresario.IModel;
 import impresario.IView;
-import impresario.ModelRegistry;
-
 import event.Event;
 import userinterface.MainStageContainer;
 import userinterface.View;
 import userinterface.ViewFactory;
 import userinterface.WindowPosition;
 
-public class AddTreeTransaction implements IView, IModel {
-    private Properties dependencies;
-    private ModelRegistry myRegistry;
+public class AddTreeTransaction extends Transaction {
 
+    private Properties dependencies;
     private Hashtable<String, Scene> myViews;
     private Stage myStage;
+    private String transactionErrorMessage = "";
+    private String successMessage = "";
 
-    private String loginErrorMessage;
-    private String transactionErrorMessage;
-    private String successMessage;
-    //private TreeCollection treeCollection
+    public AddTreeTransaction() {
+        super();
 
-    public AddTreeTransaction()
-    {
         myStage = MainStageContainer.getInstance();
-        myViews = new Hashtable<String, Scene>();
+        myViews = new Hashtable<>();
 
-        myRegistry = new ModelRegistry("AddTreeTransaction");
-        //treeCollection = new TreeCollection();
-
-        if(myRegistry == null){
-            new Event(Event.getLeafLevelClassName(this), "AddTreeTransaction",
-                    "Could not instantiate Registry", Event.ERROR);
-
-        }
         setDependencies();
-
-
     }
 
-    private void setDependencies() {
+    @Override
+    protected void setDependencies() {
         dependencies = new Properties();
-        dependencies.setProperty("loginErrorMessage", loginErrorMessage);
-        dependencies.setProperty("successMessage", successMessage);
-        dependencies.setProperty("transactionErrorMessage", transactionErrorMessage);
-
         myRegistry.setDependencies(dependencies);
     }
 
-
-
-
-
-    public Object getState(String key)
-    {
-        /** if(key.equals("TreeCollection")){
-         return treeCollection;
-         } */
-
-        return "";
+    @Override
+    protected Scene createView() {
+        View newView = ViewFactory.createView("AddTreeView", this); // Must be "AddTreeView"!
+        Scene currentScene = new Scene(newView);
+        myViews.put("AddTreeView", currentScene);
+        return currentScene;
     }
 
-    public void updateState(String key, Object value)
-    {
-        // DEBUG System.out.println("Teller.updateState: key: " + key);
-
-        stateChangeRequest(key, value);
-    }
-
-    /** Register objects to receive state updates. */
-    //----------------------------------------------------------
-    public void subscribe(String key, IView subscriber) {
-
-    }
-
-    /** Unregister previously registered objects. */
-    //----------------------------------------------------------
-    public void unSubscribe(String key, IView subscriber) {
-
-    }
-
+    @Override
     public void stateChangeRequest(String key, Object value) {
-        if(key.equals("Done")){
-            //CreateTreeLotCoordinator();
-        }else if(key.equals("AddTree")){
-            Tree tree = new Tree();
-
-            Scene currentScene = (Scene)myViews.get("TreeView");
-
-            if(currentScene != null){
-                View newView = ViewFactory.createView("TreeView", this);
-                currentScene = new Scene(newView);
-                myViews.put("TreeView", currentScene);
-            }
-
-            swapToView(currentScene);
+        if ("DoYourJob".equals(key)) {
+            doYourJob();
+        } else if ("CancelTransaction".equals(key)) {
+            // Optional - can return to main menu if you want
         }
+        myRegistry.updateSubscribers(key, this);
     }
 
-    public void swapToView(Scene newScene)
-    {
+    @Override
+    public void doYourJob() {
+        Scene newScene = createView();
+        swapToView(newScene);
+    }
 
-
-        if (newScene == null)
-        {
-            System.out.println("Teller.swapToView(): Missing view for display");
+    public void swapToView(Scene newScene) {
+        if (newScene == null) {
+            System.out.println("AddTreeTransaction.swapToView(): Missing view for display");
             new Event(Event.getLeafLevelClassName(this), "swapToView",
                     "Missing view for display ", Event.ERROR);
             return;
@@ -121,8 +71,32 @@ public class AddTreeTransaction implements IView, IModel {
 
         myStage.setScene(newScene);
         myStage.sizeToScene();
-
         WindowPosition.placeCenter(myStage);
     }
-}
 
+    @Override
+    public Object getState(String key) {
+        if ("TransactionErrorMessage".equals(key)) {
+            return transactionErrorMessage;
+        }
+        if ("SuccessMessage".equals(key)) {
+            return successMessage;
+        }
+        return null;
+    }
+
+    @Override
+    public void updateState(String key, Object value) {
+        stateChangeRequest(key, value);
+    }
+
+    @Override
+    public void subscribe(String key, IView subscriber) {
+        myRegistry.subscribe(key, subscriber);
+    }
+
+    @Override
+    public void unSubscribe(String key, IView subscriber) {
+        myRegistry.unSubscribe(key, subscriber);
+    }
+}

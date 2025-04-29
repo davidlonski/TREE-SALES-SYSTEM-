@@ -11,13 +11,15 @@ import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Properties;
 
 public class AddTreeView extends View {
 
     private ComboBox<String> typeComboBox;
     private TextField barcodeField;
-    private TextField statusField;
+    private TextField notesField;
     private TextField dateStatusField;
 
     private Button submitButton;
@@ -68,18 +70,18 @@ public class AddTreeView extends View {
         barcodeField = new TextField();
         barcodeField.setPromptText("Barcode Prefix");
 
-        statusField = new TextField("Active");
-        statusField.setPromptText("Status");
+        notesField = new TextField("Notes");
+        notesField.setPromptText("Notes");
 
         dateStatusField = new TextField();
-        dateStatusField.setPromptText("Date Status (YYYY-MM-DD)");
+        dateStatusField.setText(new SimpleDateFormat("MM-dd-yyyy").format(new Date()));
 
         grid.add(new Label("Tree Type:"), 0, 0);
         grid.add(typeComboBox, 1, 0);
         grid.add(new Label("Barcode Prefix:"), 0, 1);
         grid.add(barcodeField, 1, 1);
-        grid.add(new Label("Status:"), 0, 2);
-        grid.add(statusField, 1, 2);
+        grid.add(new Label("Notes:"), 0, 2);
+        grid.add(notesField, 1, 2);
         grid.add(new Label("Date Status:"), 0, 3);
         grid.add(dateStatusField, 1, 3);
 
@@ -105,7 +107,7 @@ public class AddTreeView extends View {
 
         String type = typeComboBox.getValue();
         String barcode = barcodeField.getText().trim();
-        String status = statusField.getText().trim();
+        String status = notesField.getText().trim();
         String dateStatus = dateStatusField.getText().trim();
 
         if (type == null || barcode.isEmpty() || status.isEmpty() || dateStatus.isEmpty()) {
@@ -132,7 +134,7 @@ public class AddTreeView extends View {
     private void clearFields() {
         typeComboBox.setValue(null);
         barcodeField.clear();
-        statusField.setText("Active");
+        notesField.setText("Active");
         dateStatusField.clear();
     }
 

@@ -111,10 +111,11 @@ public class TransactionChoiceView extends View {
         addTreeTransactionButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
-                processAction(event);
+                myModel.stateChangeRequest("AddTreeTransaction", null);
             }
         });
         addTreeTransactionButton.setPrefWidth(150);
+
 
         modifyTreeTransactionButton = new Button("Modify A Tree");
         modifyTreeTransactionButton.setOnAction(new EventHandler<ActionEvent>() {
