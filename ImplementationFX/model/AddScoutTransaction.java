@@ -1,26 +1,17 @@
 package model;
 
-import java.util.Hashtable;
 import java.util.Properties;
 import java.util.Optional;
 
 import javafx.application.Platform;
-import javafx.stage.Stage;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.ButtonType;
 
 // project imports
-import impresario.IModel;
-import impresario.IView;
-import impresario.ModelRegistry;
-
-import event.Event;
-import userinterface.MainStageContainer;
 import userinterface.View;
 import userinterface.ViewFactory;
-import userinterface.WindowPosition;
 
 public class AddScoutTransaction extends Transaction {
     private Scout newScout;

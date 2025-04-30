@@ -26,7 +26,7 @@ public class ModifyScoutTransaction extends Transaction {
     /**
      * Constructor for this class.
      */
-    public ModifyScoutTransaction() throws Exception {
+    public ModifyScoutTransaction() {
         super();
     }
 
