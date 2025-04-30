@@ -19,23 +19,23 @@ public class Tree extends EntityBase implements IView, impresario.IModel {
     protected Properties persistentState;
     private String updateStatusMessage = "";
 
-    public Tree(String barcode) throws InvalidPrimaryKeyException {
-        super(myTableName);
-        setDependencies();
-        String query = "SELECT * FROM " + myTableName + " WHERE Barcode = '" + barcode + "'";
-        Vector<Properties> result = getSelectQueryResult(query);
-
-        if (result == null || result.size() != 1) {
-            throw new InvalidPrimaryKeyException("No tree found with Barcode: " + barcode);
-        } else {
-            this.persistentState = result.elementAt(0);
-        }
-    }
-
     public Tree() {
         super(myTableName);
         persistentState = new Properties();
         setDependencies();
+    }
+
+    public Tree(String id) throws InvalidPrimaryKeyException {
+        super(myTableName);
+        setDependencies();
+        String query = "SELECT * FROM " + myTableName + " WHERE Barcode = '" + id + "'";
+        Vector<Properties> result = getSelectQueryResult(query);
+     
+        if (result == null || result.size() != 1) {
+            throw new InvalidPrimaryKeyException("No tree found with Barcode: " + id);
+        } else {
+            persistentState = result.firstElement();
+        }
     }
 
     public Tree(Properties props) {
@@ -43,31 +43,39 @@ public class Tree extends EntityBase implements IView, impresario.IModel {
         setDependencies();
         persistentState = new Properties();
 
-        Enumeration<?> keys = props.propertyNames();
-        while (keys.hasMoreElements()) {
-            String key = (String) keys.nextElement();
-            String value = props.getProperty(key);
-            persistentState.setProperty(key, value);
+        String barcode = props.getProperty("Barcode");
+        String notes = props.getProperty("Notes");
+        String dateStatus = props.getProperty("DateStatusUpdated");
+        String treeType = props.getProperty("TreeType");
+        String status = props.getProperty("Status");
+
+        if (barcode != null && barcode.length() > 20) {
+            throw new IllegalArgumentException("Barcode must be 20 characters or fewer.");
+        }
+        if (notes != null && notes.length() > 200) {
+            throw new IllegalArgumentException("Notes must be 200 characters or fewer.");
+        }
+        if (status != null && !status.equals("Available") && !status.equals("Sold") && !status.equals("Damaged")) {
+            throw new IllegalArgumentException("Status must be one of: Available, Sold, or Damaged");
         }
 
-        if (!persistentState.containsKey("Status")) {
-            persistentState.setProperty("Status", "Available");
+        Enumeration allKeys = props.propertyNames();
+        while (allKeys.hasMoreElements()) {
+            String nextKey = (String) allKeys.nextElement();
+            persistentState.setProperty(nextKey, props.getProperty(nextKey));
         }
     }
 
     private void setDependencies() {
         dependencies = new Properties();
-        if (myRegistry != null) {
-            myRegistry.setDependencies(dependencies);
-        }
+        myRegistry.setDependencies(dependencies);
     }
 
     public Object getState(String key) {
+        if (key.equals("UpdateStatusMessage")) {
+            return updateStatusMessage;
+        }
         return persistentState.getProperty(key);
-    }
-
-    public void setState(String key, String value) {
-        persistentState.setProperty(key, value);
     }
 
     public void stateChangeRequest(String key, Object value) {
@@ -75,33 +83,7 @@ public class Tree extends EntityBase implements IView, impresario.IModel {
     }
 
     public void updateState(String key, Object value) {
-        stateChangeRequest(key, value);
-    }
-
-    protected void initializeSchema(String tableName) {
-        if (mySchema == null) {
-            mySchema = getSchemaInfo(tableName);
-        }
-    }
-
-    public void update() throws SQLException {
-        String barcode = persistentState.getProperty("Barcode");
-        if (barcode == null || barcode.isEmpty()) {
-            insertNewTree();
-        } else {
-            updateExistingTree(barcode);
-        }
-    }
-
-    private void insertNewTree() throws SQLException {
-        Properties treeData = getStateAsProperties();
-        insertPersistentState(mySchema, treeData);
-    }
-
-    private void updateExistingTree(String barcode) throws SQLException {
-        Properties whereClause = new Properties();
-        whereClause.setProperty("Barcode", barcode);
-        updatePersistentState(mySchema, persistentState, whereClause);
+        myRegistry.updateSubscribers(key, this);
     }
 
     private Properties getStateAsProperties() {
@@ -110,32 +92,95 @@ public class Tree extends EntityBase implements IView, impresario.IModel {
         data.setProperty("TreeType", persistentState.getProperty("TreeType", ""));
         data.setProperty("Notes", persistentState.getProperty("Notes", ""));
         data.setProperty("Status", persistentState.getProperty("Status", "Available"));
-        data.setProperty("DateStatusUpdated", persistentState.getProperty("DateStatusUpdated", ""));
+        data.setProperty("DateStatusUpdated", persistentState.getProperty("DateStatusUpdated", 
+            new SimpleDateFormat("MM-dd-yyyy").format(new Date())));
         return data;
     }
 
-    public void sellTree() {
-        persistentState.setProperty("Status", "Sold");
-        String date = new SimpleDateFormat("MM-dd-yyyy").format(new Date());
-        persistentState.setProperty("DateStatusUpdated", date);
+    public void setState(String key, String value) {
+        persistentState.setProperty(key, value);
+    }
+
+    public void save() {
+        insertTree();
+    }
+
+    private void insertTree() {
+        try {
+            Properties props = getStateAsProperties();
+            if (props.getProperty("Barcode") == null || props.getProperty("Barcode").trim().isEmpty()) {
+                throw new SQLException("Barcode cannot be empty");
+            }
+            if (props.getProperty("TreeType") == null || props.getProperty("TreeType").trim().isEmpty()) {
+                throw new SQLException("TreeType cannot be empty");
+            }
+            insertPersistentState(mySchema, props);
+            updateStatusMessage = "Tree with barcode: " + props.getProperty("Barcode") + " inserted successfully!";
+        } catch (SQLException ex) {
+            updateStatusMessage = "Error saving tree: " + ex.getMessage();
+            throw new RuntimeException(updateStatusMessage);
+        }
+    }
+
+    private void updateStateInDatabase() {
+        try {
+            if (persistentState.getProperty("Barcode") != null) {
+                Properties whereClause = new Properties();
+                whereClause.setProperty("Barcode", persistentState.getProperty("Barcode"));
+                updatePersistentState(mySchema, persistentState, whereClause);
+                updateStatusMessage = "Tree data for tree with barcode: " + persistentState.getProperty("Barcode") + " updated successfully in database!";
+            } else {
+                throw new SQLException("Barcode cannot be null");
+            }
+        } catch (SQLException ex) {
+            updateStatusMessage = "Error in installing tree data in database: " + ex.getMessage();
+            throw new RuntimeException("Error saving tree: " + ex.getMessage());
+        }
+    }
+
+    public Vector<String> getEntryListView() {
+        Vector<String> view = new Vector<>();
+        view.add(persistentState.getProperty("Barcode"));
+        view.add(persistentState.getProperty("TreeType"));
+        view.add(persistentState.getProperty("Notes"));
+        view.add(persistentState.getProperty("Status"));
+        view.add(persistentState.getProperty("DateStatusUpdated"));
+        return view;
+    }
+
+    protected void initializeSchema(String tableName) {
+        if (mySchema == null) {
+            mySchema = getSchemaInfo(tableName);
+        }
     }
 
     @Override
     public String toString() {
         return "Barcode: " + getState("Barcode") +
-                ", Tree Type: " + getState("TreeType") +
+                ", TreeType: " + getState("TreeType") +
                 ", Notes: " + getState("Notes") +
                 ", Status: " + getState("Status") +
-                ", Date Status Updated: " + getState("DateStatusUpdated");
+                ", DateStatusUpdated: " + getState("DateStatusUpdated");
     }
 
-    public Vector<String> getEntryListView() {
-        Vector<String> view = new Vector<>();
-        view.addElement(persistentState.getProperty("Barcode"));
-        view.addElement(persistentState.getProperty("TreeType"));
-        view.addElement(persistentState.getProperty("Notes"));
-        view.addElement(persistentState.getProperty("Status"));
-        view.addElement(persistentState.getProperty("DateStatusUpdated"));
-        return view;
+    public void display() {
+        System.out.println(toString());
+    }
+
+    public void sellTree() {
+        persistentState.setProperty("Status", "Sold");
+        persistentState.setProperty("DateStatusUpdated", 
+            new SimpleDateFormat("MM-dd-yyyy").format(new Date()));
+        save();
+    }
+
+    public void markAsDamaged() {
+        persistentState.setProperty("Status", "Damaged");
+        persistentState.setProperty("DateStatusUpdated", 
+            new SimpleDateFormat("MM-dd-yyyy").format(new Date()));
+        save();
     }
 }
+    
+    
+    

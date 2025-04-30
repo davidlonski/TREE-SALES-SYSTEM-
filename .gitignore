@@ -27,3 +27,8 @@ replay_pid*
 ImplementationFX/model/TREE-SALES-SYSTEM-.code-workspace
 TREE-SALES-SYSTEM-.iml
 ErrorLog.txt
+pom.xml
+launch.json
+.vscode
+
+tree-sales-system.iml

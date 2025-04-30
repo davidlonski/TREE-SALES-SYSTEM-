@@ -51,6 +51,8 @@ public class AddTreeTransaction extends Transaction {
             doYourJob();
         } else if ("CancelTransaction".equals(key)) {
             // Optional - can return to main menu if you want
+        } else if ("AddTree".equals(key)) {
+            processTransaction((Properties) value);
         }
         myRegistry.updateSubscribers(key, this);
     }
@@ -59,6 +61,18 @@ public class AddTreeTransaction extends Transaction {
     public void doYourJob() {
         Scene newScene = createView();
         swapToView(newScene);
+    }
+
+    protected void processTransaction(Properties treeData) {
+        System.out.println("AddTreeTransaction.processTransaction(): " + treeData);
+
+        try {
+            Tree newTree = new Tree(treeData);
+            newTree.save();
+        } catch (Exception e) {
+            transactionErrorMessage = "ERROR: Failed to add tree - " + e.getMessage();
+            myRegistry.updateSubscribers("TransactionError", this);
+        }
     }
 
     public void swapToView(Scene newScene) {

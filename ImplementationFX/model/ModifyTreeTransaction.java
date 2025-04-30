@@ -30,11 +30,6 @@ public class ModifyTreeTransaction extends Transaction {
 
     public ModifyTreeTransaction() {
         super();
-
-        myStage = MainStageContainer.getInstance();
-        myViews = new Hashtable<>();
-
-        setDependencies();
     }
 
     @Override
@@ -115,18 +110,6 @@ public class ModifyTreeTransaction extends Transaction {
         swapToView(newScene);
     }
 
-    public void swapToView(Scene newScene) {
-        if (newScene == null) {
-            System.out.println("ModifyTreeTransaction.swapToView(): Missing view for display");
-            new Event(Event.getLeafLevelClassName(this), "swapToView",
-                    "Missing view for display ", Event.ERROR);
-            return;
-        }
-
-        myStage.setScene(newScene);
-        myStage.sizeToScene();
-        WindowPosition.placeCenter(myStage);
-    }
 
     @Override
     public Object getState(String key) {
@@ -137,20 +120,5 @@ public class ModifyTreeTransaction extends Transaction {
             return successMessage;
         }
         return null;
-    }
-
-    @Override
-    public void updateState(String key, Object value) {
-        stateChangeRequest(key, value);
-    }
-
-    @Override
-    public void subscribe(String key, IView subscriber) {
-        myRegistry.subscribe(key, subscriber);
-    }
-
-    @Override
-    public void unSubscribe(String key, IView subscriber) {
-        myRegistry.unSubscribe(key, subscriber);
     }
 }

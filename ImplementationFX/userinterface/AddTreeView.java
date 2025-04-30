@@ -10,14 +10,17 @@ import javafx.scene.layout.*;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
+import model.TreeTypeCollection;
+import model.TreeType;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Properties;
+import java.util.Vector;
 
 public class AddTreeView extends View {
 
-    private ComboBox<String> typeComboBox;
+    private ComboBox<TreeType> typeComboBox;
     private TextField barcodeField;
     private TextField notesField;
     private TextField dateStatusField;
@@ -53,32 +56,47 @@ public class AddTreeView extends View {
         grid.setPadding(new Insets(25, 25, 25, 25));
 
         typeComboBox = new ComboBox<>();
-        typeComboBox.getItems().addAll(
-                "Frasier Fir - Regular",
-                "Frasier Fir - Premium",
-                "Douglass Fir - Regular",
-                "Douglass Fir - Premium",
-                "Blue Spruce - Regular",
-                "Blue Spruce - Premium",
-                "Concolor - Regular",
-                "Concolor - Premium",
-                "Balsam Fir - Regular",
-                "Balsam Fir - Premium"
-        );
         typeComboBox.setPromptText("Select Tree Type");
+        
+        // Populate the ComboBox with tree types from the database
+        TreeTypeCollection treeTypes = new TreeTypeCollection();
+        treeTypes.findAllTreeTypes();
+        Vector<TreeType> types = (Vector<TreeType>)treeTypes.getState("TreeTypes");
+        if (types != null) {
+            typeComboBox.getItems().addAll(types);
+        }
+        
+        // Set the cell factory to display the type description
+        typeComboBox.setCellFactory(lv -> new ListCell<TreeType>() {
+            @Override
+            protected void updateItem(TreeType item, boolean empty) {
+                super.updateItem(item, empty);
+                setText(empty ? "" : item.getState("TypeDescription").toString());
+            }
+        });
+        
+        // Set the button cell to display the type description
+        typeComboBox.setButtonCell(new ListCell<TreeType>() {
+            @Override
+            protected void updateItem(TreeType item, boolean empty) {
+                super.updateItem(item, empty);
+                setText(empty ? "" : item == null ? "" : item.getState("TypeDescription").toString());
+            }
+        });
 
         barcodeField = new TextField();
-        barcodeField.setPromptText("Barcode Prefix");
+        barcodeField.setPromptText("Enter Barcode");
 
-        notesField = new TextField("Notes");
-        notesField.setPromptText("Notes");
+        notesField = new TextField();
+        notesField.setPromptText("Enter Notes (optional)");
 
         dateStatusField = new TextField();
         dateStatusField.setText(new SimpleDateFormat("MM-dd-yyyy").format(new Date()));
+        dateStatusField.setEditable(false);
 
         grid.add(new Label("Tree Type:"), 0, 0);
         grid.add(typeComboBox, 1, 0);
-        grid.add(new Label("Barcode Prefix:"), 0, 1);
+        grid.add(new Label("Barcode:"), 0, 1);
         grid.add(barcodeField, 1, 1);
         grid.add(new Label("Notes:"), 0, 2);
         grid.add(notesField, 1, 2);
@@ -105,26 +123,33 @@ public class AddTreeView extends View {
     private void handleSubmit() {
         clearErrorMessage();
 
-        String type = typeComboBox.getValue();
+        TreeType selectedType = typeComboBox.getValue();
         String barcode = barcodeField.getText().trim();
-        String status = notesField.getText().trim();
+        String notes = notesField.getText().trim();
         String dateStatus = dateStatusField.getText().trim();
 
-        if (type == null || barcode.isEmpty() || status.isEmpty() || dateStatus.isEmpty()) {
-            displayErrorMessage("All fields are required.");
+        if (selectedType == null || barcode.isEmpty()) {
+            displayErrorMessage("Tree Type and Barcode are required.");
             return;
         }
 
         try {
             Properties treeData = new Properties();
-            treeData.setProperty("Type", type);
-            treeData.setProperty("BarcodePrefix", barcode);
-            treeData.setProperty("Status", status);
-            treeData.setProperty("DateStatus", dateStatus);
+            treeData.setProperty("TreeType", selectedType.getState("ID").toString());
+            treeData.setProperty("Barcode", barcode);
+            treeData.setProperty("Notes", notes);
+            treeData.setProperty("Status", "Available");
+            treeData.setProperty("DateStatusUpdated", dateStatus);
 
             myModel.stateChangeRequest("AddTree", treeData);
 
             clearFields();
+
+            typeComboBox.setValue(selectedType);
+            barcodeField.clear();
+            notesField.setText("Notes");
+            dateStatusField.setText(new SimpleDateFormat("MM-dd-yyyy").format(new Date()));
+
             displaySuccessMessage("Tree Inserted Successfully!");
         } catch (Exception ex) {
             displayErrorMessage("Error inserting tree: " + ex.getMessage());
@@ -134,8 +159,8 @@ public class AddTreeView extends View {
     private void clearFields() {
         typeComboBox.setValue(null);
         barcodeField.clear();
-        notesField.setText("Active");
-        dateStatusField.clear();
+        notesField.clear();
+        dateStatusField.setText(new SimpleDateFormat("MM-dd-yyyy").format(new Date()));
     }
 
     private void clearForm() {
