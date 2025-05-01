@@ -40,12 +40,12 @@ public class ModifyTreeView extends View {
     private VBox createFormContent() {
         VBox form = new VBox(10);
 
-        barcodeField = new TextField(treeData.getProperty("barcode", ""));
+        barcodeField = new TextField(treeData.getProperty("Barcode", ""));
         barcodeField.setEditable(false); // Barcode shouldn't be editable
-        treeTypeField = new TextField(treeData.getProperty("treeType", ""));
-        notesField = new TextField(treeData.getProperty("notes", ""));
-        statusField = new TextField(treeData.getProperty("status", ""));
-        dateStatusUpdatedField = new TextField(treeData.getProperty("dateStatusUpdated", ""));
+        treeTypeField = new TextField(treeData.getProperty("TreeType", ""));
+        notesField = new TextField(treeData.getProperty("Notes", ""));
+        statusField = new TextField(treeData.getProperty("Status", ""));
+        dateStatusUpdatedField = new TextField(treeData.getProperty("DateStatusUpdated", ""));
 
         submitButton = new Button("Submit Changes");
         cancelButton = new Button("Cancel");
@@ -88,11 +88,11 @@ public class ModifyTreeView extends View {
         }
 
         Properties updatedProps = new Properties();
-        updatedProps.setProperty("barcode", barcode);
-        updatedProps.setProperty("treeType", treeType);
-        updatedProps.setProperty("notes", notes);
-        updatedProps.setProperty("status", status);
-        updatedProps.setProperty("dateStatusUpdated", dateStatusUpdated);
+        updatedProps.setProperty("TreeType", treeType);
+        updatedProps.setProperty("Barcode", barcode);
+        updatedProps.setProperty("Notes", notes);
+        updatedProps.setProperty("Status", status);
+        updatedProps.setProperty("DateStatusUpdated", dateStatusUpdated);
 
         myModel.stateChangeRequest("ModifyTreeData", updatedProps);
         statusLog.displayMessage("Tree info updated successfully!");

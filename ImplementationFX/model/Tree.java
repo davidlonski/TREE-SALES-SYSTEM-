@@ -114,6 +114,9 @@ public class Tree extends EntityBase implements IView, impresario.IModel {
                 updatePersistentState(mySchema, persistentState, whereClause);
                 updateStatusMessage = "Tree data for barcode: " + persistentState.getProperty("Barcode") + " updated successfully in database!";
             } else {
+                if (persistentState.getProperty("TreeType") == null || persistentState.getProperty("Status") == null) {
+                    throw new RuntimeException("Required fields (TreeType, Status) are missing");
+                }
                 insertPersistentState(mySchema, persistentState);
                 updateStatusMessage = "New tree data installed successfully in database!";
             }

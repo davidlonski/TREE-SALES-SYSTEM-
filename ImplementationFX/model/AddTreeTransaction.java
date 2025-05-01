@@ -67,11 +67,23 @@ public class AddTreeTransaction extends Transaction {
         System.out.println("AddTreeTransaction.processTransaction(): " + treeData);
 
         try {
-            Tree newTree = new Tree(treeData);
+            Properties dbProps = new Properties();
+            dbProps.setProperty("Barcode", treeData.getProperty("Barcode"));
+            dbProps.setProperty("TreeType", treeData.getProperty("TreeType"));
+            dbProps.setProperty("Notes", treeData.getProperty("Notes"));
+            dbProps.setProperty("Status", "Available");  // Set to Available
+            dbProps.setProperty("DateStatusUpdated", treeData.getProperty("DateStatusUpdated"));
+
+            Tree newTree = new Tree(dbProps);
             newTree.save();
+            
+            successMessage = "Tree " + dbProps.getProperty("Barcode") + " has been successfully added!";
+            myRegistry.updateSubscribers("TransactionStatusMessage", this);
+            myRegistry.updateSubscribers("CancelTransaction", this);
         } catch (Exception e) {
             transactionErrorMessage = "ERROR: Failed to add tree - " + e.getMessage();
             myRegistry.updateSubscribers("TransactionError", this);
+            myRegistry.updateSubscribers("TransactionStatusMessage", this);
         }
     }
 
