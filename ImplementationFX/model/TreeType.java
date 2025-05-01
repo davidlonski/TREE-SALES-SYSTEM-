@@ -109,6 +109,10 @@ public class TreeType extends EntityBase implements IModel, IView {
         }
     }
 
+    public void save() {
+        updateStateInDatabase();
+    }
+
     @Override
     protected void initializeSchema(String tableName) {
         if (mySchema == null) {
