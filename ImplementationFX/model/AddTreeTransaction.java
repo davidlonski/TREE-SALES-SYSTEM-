@@ -2,8 +2,13 @@ package model;
 
 import java.util.Hashtable;
 import java.util.Properties;
+import java.util.Optional;
 
+import javafx.application.Platform;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
+import javafx.scene.control.ButtonType;
 import javafx.stage.Stage;
 
 import impresario.IModel;
@@ -20,26 +25,25 @@ public class AddTreeTransaction extends Transaction {
     private Hashtable<String, Scene> myViews;
     private Stage myStage;
     private String transactionErrorMessage = "";
-    private String successMessage = "";
+    private String transactionSuccessMessage = "";
 
     public AddTreeTransaction() {
         super();
-
-        myStage = MainStageContainer.getInstance();
         myViews = new Hashtable<>();
-
+        myStage = MainStageContainer.getInstance();
         setDependencies();
     }
 
     @Override
     protected void setDependencies() {
         dependencies = new Properties();
+        dependencies.setProperty("TransactionStatusMessage", "");
         myRegistry.setDependencies(dependencies);
     }
 
     @Override
     protected Scene createView() {
-        View newView = ViewFactory.createView("AddTreeView", this); // Must be "AddTreeView"!
+        View newView = ViewFactory.createView("AddTreeView", this);
         Scene currentScene = new Scene(newView);
         myViews.put("AddTreeView", currentScene);
         return currentScene;
@@ -50,11 +54,10 @@ public class AddTreeTransaction extends Transaction {
         if ("DoYourJob".equals(key)) {
             doYourJob();
         } else if ("CancelTransaction".equals(key)) {
-            // Optional - can return to main menu if you want
+            myRegistry.updateSubscribers("CancelTransaction", this);
         } else if ("AddTree".equals(key)) {
             processTransaction((Properties) value);
         }
-        myRegistry.updateSubscribers(key, this);
     }
 
     @Override
@@ -64,27 +67,43 @@ public class AddTreeTransaction extends Transaction {
     }
 
     protected void processTransaction(Properties treeData) {
-        System.out.println("AddTreeTransaction.processTransaction(): " + treeData);
-
         try {
             Properties dbProps = new Properties();
             dbProps.setProperty("Barcode", treeData.getProperty("Barcode"));
             dbProps.setProperty("TreeType", treeData.getProperty("TreeType"));
             dbProps.setProperty("Notes", treeData.getProperty("Notes"));
-            dbProps.setProperty("Status", "Available");  // Set to Available
+            dbProps.setProperty("Status", "Available");
             dbProps.setProperty("DateStatusUpdated", treeData.getProperty("DateStatusUpdated"));
 
             Tree newTree = new Tree(dbProps);
             newTree.save();
-            
-            successMessage = "Tree " + dbProps.getProperty("Barcode") + " has been successfully added!";
-            myRegistry.updateSubscribers("TransactionStatusMessage", this);
-            myRegistry.updateSubscribers("CancelTransaction", this);
+
+            transactionSuccessMessage = "Tree " + dbProps.getProperty("Barcode") + " has been successfully added!";
+            showSuccessNotification(dbProps.getProperty("Barcode"));
+
         } catch (Exception e) {
             transactionErrorMessage = "ERROR: Failed to add tree - " + e.getMessage();
-            myRegistry.updateSubscribers("TransactionError", this);
             myRegistry.updateSubscribers("TransactionStatusMessage", this);
         }
+    }
+
+    private void showSuccessNotification(String barcode) {
+        Platform.runLater(() -> {
+            Alert alert = new Alert(AlertType.INFORMATION);
+            alert.setTitle("Tree Added");
+            alert.setHeaderText("Tree Added Successfully");
+            alert.setContentText("Tree " + barcode + " has been successfully added to the database.");
+
+            ButtonType doneButton = new ButtonType("Done");
+            alert.getButtonTypes().setAll(doneButton);
+
+            Optional<ButtonType> result = alert.showAndWait();
+
+            if (result.isPresent() && result.get() == doneButton) {
+                myRegistry.updateSubscribers("TransactionStatusMessage", this);
+                myRegistry.updateSubscribers("CancelTransaction", this);
+            }
+        });
     }
 
     public void swapToView(Scene newScene) {
@@ -104,9 +123,13 @@ public class AddTreeTransaction extends Transaction {
     public Object getState(String key) {
         if ("TransactionErrorMessage".equals(key)) {
             return transactionErrorMessage;
-        }
-        if ("SuccessMessage".equals(key)) {
-            return successMessage;
+        } else if ("TransactionStatusMessage".equals(key)) {
+            if (!transactionSuccessMessage.isEmpty()) {
+                return transactionSuccessMessage;
+            } else if (!transactionErrorMessage.isEmpty()) {
+                return transactionErrorMessage;
+            }
+            return "";
         }
         return null;
     }

@@ -109,11 +109,26 @@ public class Tree extends EntityBase implements IView, impresario.IModel {
     private void updateStateInDatabase() {
         try {
             if (persistentState.getProperty("Barcode") != null) {
-                Properties whereClause = new Properties();
-                whereClause.setProperty("Barcode", persistentState.getProperty("Barcode"));
-                updatePersistentState(mySchema, persistentState, whereClause);
-                updateStatusMessage = "Tree data for barcode: " + persistentState.getProperty("Barcode") + " updated successfully in database!";
+                // Check if tree exists
+                String query = "SELECT * FROM " + myTableName + " WHERE Barcode = '" + persistentState.getProperty("Barcode") + "'";
+                Vector<Properties> result = getSelectQueryResult(query);
+                
+                if (result != null && result.size() > 0) {
+                    // Update existing tree
+                    Properties whereClause = new Properties();
+                    whereClause.setProperty("Barcode", persistentState.getProperty("Barcode"));
+                    updatePersistentState(mySchema, persistentState, whereClause);
+                    updateStatusMessage = "Tree data for barcode: " + persistentState.getProperty("Barcode") + " updated successfully in database!";
+                } else {
+                    // Insert new tree
+                    if (persistentState.getProperty("TreeType") == null || persistentState.getProperty("Status") == null) {
+                        throw new RuntimeException("Required fields (TreeType, Status) are missing");
+                    }
+                    insertPersistentState(mySchema, persistentState);
+                    updateStatusMessage = "New tree data installed successfully in database!";
+                }
             } else {
+                // Insert new tree without barcode check
                 if (persistentState.getProperty("TreeType") == null || persistentState.getProperty("Status") == null) {
                     throw new RuntimeException("Required fields (TreeType, Status) are missing");
                 }

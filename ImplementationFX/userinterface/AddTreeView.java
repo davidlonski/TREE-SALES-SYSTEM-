@@ -133,6 +133,16 @@ public class AddTreeView extends View {
             return;
         }
 
+        if (barcode.length() > 20) {
+            displayErrorMessage("Barcode must be 20 characters or fewer.");
+            return;
+        }
+
+        if (notes.length() > 200) {
+            displayErrorMessage("Notes must be 200 characters or fewer.");
+            return;
+        }
+
         try {
             Properties treeData = new Properties();
             treeData.setProperty("TreeType", selectedType.getState("ID").toString());
@@ -196,6 +206,7 @@ public class AddTreeView extends View {
             if (msg.toLowerCase().startsWith("error")) {
                 displayErrorMessage(msg);
             } else {
+                clearFields();
                 displaySuccessMessage(msg);
             }
         }
