@@ -34,7 +34,7 @@ public class ModifyTreeTransaction extends Transaction {
 
     public ModifyTreeTransaction() {
         super();
-        myViews = new Hashtable<String, Scene>();
+        myViews = new Hashtable<>();
     }
 
     @Override
@@ -116,8 +116,8 @@ public class ModifyTreeTransaction extends Transaction {
             treeToModify.setState("TreeType", props.getProperty("TreeType"));
             treeToModify.setState("Notes", props.getProperty("Notes"));
             treeToModify.setState("Status", props.getProperty("Status"));
-            
-            String oldStatus = (String)treeToModify.getState("Status");
+
+            String oldStatus = (String) treeToModify.getState("Status");
             String newStatus = props.getProperty("Status");
             if (newStatus != null && !newStatus.equals(oldStatus)) {
                 String today = new SimpleDateFormat("MM-dd-yyyy").format(new Date());
@@ -129,7 +129,7 @@ public class ModifyTreeTransaction extends Transaction {
             treeToModify.save();
 
             transactionSuccessMessage = "Tree " + treeToModify.getState("Barcode") + " has been successfully updated!";
-            showSuccessNotification((String)treeToModify.getState("Barcode"));
+            showSuccessNotification((String) treeToModify.getState("Barcode"));
 
         } catch (Exception e) {
             transactionErrorMessage = "ERROR: Error updating tree: " + e.getMessage();
@@ -185,11 +185,22 @@ public class ModifyTreeTransaction extends Transaction {
 
         if (currentScene == null) {
             Properties treeProps = new Properties();
-            treeProps.setProperty("Barcode", (String)treeToModify.getState("Barcode"));
-            treeProps.setProperty("TreeType", (String)treeToModify.getState("TreeType"));
-            treeProps.setProperty("Notes", (String)treeToModify.getState("Notes"));
-            treeProps.setProperty("Status", (String)treeToModify.getState("Status"));
-            treeProps.setProperty("DateStatusUpdated", (String)treeToModify.getState("DateStatusUpdated"));
+            treeProps.setProperty("Barcode", (String) treeToModify.getState("Barcode"));
+
+            // ✅ NEW: Resolve TreeType ID ➜ TypeDescription
+            String treeTypeId = (String) treeToModify.getState("TreeType");
+            try {
+                TreeType treeType = new TreeType(treeTypeId);
+                String typeDescription = (String) treeType.getState("TypeDescription");
+                treeProps.setProperty("TreeType", typeDescription);
+            } catch (Exception e) {
+                System.err.println("Could not load TreeType description for ID " + treeTypeId + ": " + e.getMessage());
+                treeProps.setProperty("TreeType", "Unknown Type");
+            }
+
+            treeProps.setProperty("Notes", (String) treeToModify.getState("Notes"));
+            treeProps.setProperty("Status", (String) treeToModify.getState("Status"));
+            treeProps.setProperty("DateStatusUpdated", (String) treeToModify.getState("DateStatusUpdated"));
 
             View newView = new userinterface.ModifyTreeView(this, treeProps);
             currentScene = new Scene(newView);
@@ -207,8 +218,8 @@ public class ModifyTreeTransaction extends Transaction {
             if (!transactionSuccessMessage.isEmpty()) {
                 return transactionSuccessMessage;
             } else if (!transactionErrorMessage.isEmpty()) {
-            return transactionErrorMessage;
-        }
+                return transactionErrorMessage;
+            }
             return "";
         } else if (key.equals("TreeList")) {
             return treeCollection;
