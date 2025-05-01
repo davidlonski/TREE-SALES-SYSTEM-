@@ -1,55 +1,62 @@
 package model;
 
-import impresario.IModel;
-import impresario.IView;
-
-import java.util.Vector;
+import database.*;
+import exception.*;
+import impresario.*;
 import java.util.Properties;
+import java.util.Vector;
 
-public class TreeCollection extends EntityBase implements IModel, IView {
+public class TreeCollection extends EntityBase implements IView, impresario.IModel {
 
-    private static final String myTableName = "TreeType";
-    private Vector<Tree> treeC;
+    private Vector<Tree> trees;
+    private static final String myTableName = "Tree";
 
-    public TreeCollection() {
+    public TreeCollection() throws Exception {
         super(myTableName);
-        treeC = new Vector<>();
+        trees = new Vector<>();
+    }
+
+    public void findTreesWithBarcodeLike(String barcode) {
+        trees = new Vector<>();
+        String query = "SELECT * FROM " + myTableName + " WHERE Barcode LIKE '%" + barcode + "%'";
+        populateTrees(query);
     }
 
     public void findAllTrees() {
         String query = "SELECT * FROM " + myTableName;
-        Vector<Properties> allDataRetrieved = getSelectQueryResult(query);
+        populateTrees(query);
+    }
 
-        if (allDataRetrieved != null) {
-            for (Properties props : allDataRetrieved) {
-                Tree treeCo = new Tree(props);
-                treeC.add(treeCo);
+    private void populateTrees(String query) {
+        Vector<Properties> results = getSelectQueryResult(query);
+        if (results != null) {
+            for (Properties data : results) {
+                trees.add(new Tree(data));
             }
         }
     }
 
     @Override
     public Object getState(String key) {
-        if ("Tree".equals(key)) {
-            return treeC;
-        }
+        if (key.equals("Trees")) return trees;
+        else if (key.equals("TreeList")) return this;
         return null;
     }
 
     @Override
-    public void updateState(String key, Object value) {
-
-    }
-
-    @Override
-    public void initializeSchema(String tableName) {
-        if (mySchema == null) {
-            mySchema = getSchemaInfo(tableName);
-        }
-    }
-
     public void stateChangeRequest(String key, Object value) {
         myRegistry.updateSubscribers(key, this);
     }
 
+    @Override
+    public void updateState(String key, Object value) {
+        stateChangeRequest(key, value);
+    }
+
+    @Override
+    protected void initializeSchema(String tableName) {
+        if (mySchema == null) {
+            mySchema = getSchemaInfo(tableName);
+        }
+    }
 }

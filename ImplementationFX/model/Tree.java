@@ -55,8 +55,9 @@ public class Tree extends EntityBase implements IView, impresario.IModel {
         if (notes != null && notes.length() > 200) {
             throw new IllegalArgumentException("Notes must be 200 characters or fewer.");
         }
-        if (status != null && !status.equals("Available") && !status.equals("Sold") && !status.equals("Damaged")) {
-            throw new IllegalArgumentException("Status must be one of: Available, Sold, or Damaged");
+        if (status != null && !status.equals("Available") && !status.equals("Sold") 
+            && !status.equals("Damaged") && !status.equals("Inactive")) {
+            throw new IllegalArgumentException("Status must be one of: Available, Sold, Damaged, or Inactive");
         }
 
         Enumeration allKeys = props.propertyNames();
@@ -102,24 +103,7 @@ public class Tree extends EntityBase implements IView, impresario.IModel {
     }
 
     public void save() {
-        insertTree();
-    }
-
-    private void insertTree() {
-        try {
-            Properties props = getStateAsProperties();
-            if (props.getProperty("Barcode") == null || props.getProperty("Barcode").trim().isEmpty()) {
-                throw new SQLException("Barcode cannot be empty");
-            }
-            if (props.getProperty("TreeType") == null || props.getProperty("TreeType").trim().isEmpty()) {
-                throw new SQLException("TreeType cannot be empty");
-            }
-            insertPersistentState(mySchema, props);
-            updateStatusMessage = "Tree with barcode: " + props.getProperty("Barcode") + " inserted successfully!";
-        } catch (SQLException ex) {
-            updateStatusMessage = "Error saving tree: " + ex.getMessage();
-            throw new RuntimeException(updateStatusMessage);
-        }
+        updateStateInDatabase();
     }
 
     private void updateStateInDatabase() {
@@ -128,9 +112,10 @@ public class Tree extends EntityBase implements IView, impresario.IModel {
                 Properties whereClause = new Properties();
                 whereClause.setProperty("Barcode", persistentState.getProperty("Barcode"));
                 updatePersistentState(mySchema, persistentState, whereClause);
-                updateStatusMessage = "Tree data for tree with barcode: " + persistentState.getProperty("Barcode") + " updated successfully in database!";
+                updateStatusMessage = "Tree data for barcode: " + persistentState.getProperty("Barcode") + " updated successfully in database!";
             } else {
-                throw new SQLException("Barcode cannot be null");
+                insertPersistentState(mySchema, persistentState);
+                updateStatusMessage = "New tree data installed successfully in database!";
             }
         } catch (SQLException ex) {
             updateStatusMessage = "Error in installing tree data in database: " + ex.getMessage();
@@ -178,6 +163,16 @@ public class Tree extends EntityBase implements IView, impresario.IModel {
         persistentState.setProperty("Status", "Damaged");
         persistentState.setProperty("DateStatusUpdated", 
             new SimpleDateFormat("MM-dd-yyyy").format(new Date()));
+        save();
+    }
+
+    public void setInactive() throws SQLException {
+        setState("Status", "Inactive");
+        
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        String currentDate = dateFormat.format(new java.util.Date());
+        setState("DateStatusUpdated", currentDate);
+        
         save();
     }
 }

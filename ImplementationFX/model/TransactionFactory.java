@@ -38,11 +38,11 @@ public class TransactionFactory
 		}
 		else if (transType.equals("ModifyTreeTransaction"))
 		{
-			//retValue = new ModifyTreeTransaction();
+			retValue = new ModifyTreeTransaction();
 		}
 		else if (transType.equals("RemoveTreeTransaction"))
 		{
-			//retValue = new RemoveTreeTransaction();
+			retValue = new RemoveTreeTransaction();
 		}
 		else if (transType.equals("AddTreeTypeTransaction"))
 		{

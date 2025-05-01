@@ -1,38 +1,27 @@
 package model;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Hashtable;
-import java.util.Optional;
-import java.util.Properties;
-
-import exception.InvalidPrimaryKeyException;
-import javafx.application.Platform;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
-import javafx.scene.control.ButtonType;
 import javafx.scene.control.Alert.AlertType;
-import javafx.stage.Stage;
+import javafx.scene.control.ButtonType;
+import javafx.application.Platform;
+import java.util.Properties;
+import java.sql.SQLException;
+import java.util.Optional;
 
 import event.Event;
-import impresario.IModel;
-import impresario.IView;
-import userinterface.MainStageContainer;
+import exception.InvalidPrimaryKeyException;
 import userinterface.View;
 import userinterface.ViewFactory;
-import userinterface.WindowPosition;
 
-public class ModifyTreeTransaction extends Transaction {
+public class RemoveTreeTransaction extends Transaction {
 
-    private Properties dependencies;
-    private Hashtable<String, Scene> myViews;
-    private Stage myStage;
+    private TreeCollection treeCollection;
+    private Tree treeToRemove;
     private String transactionErrorMessage = "";
     private String transactionSuccessMessage = "";
-    private TreeCollection treeCollection;
-    private Tree treeToModify;
 
-    public ModifyTreeTransaction() {
+    public RemoveTreeTransaction() throws Exception {
         super();
     }
 
@@ -65,9 +54,9 @@ public class ModifyTreeTransaction extends Transaction {
         } else if (key.equals("TreeSelected")) {
             String barcode = (String) value;
             treeSelected(barcode);
-        } else if (key.equals("ModifyTreeData")) {
-            processModification((Properties) value);
-        } else if (key.equals("CancelModifyTree")) {
+        } else if (key.equals("RemoveTree")) {
+            processRemoval();
+        } else if (key.equals("CancelRemoval")) {
             createAndShowTreeCollectionView();
         } else if (key.equals("CancelTreeList")) {
             createAndShowTreeSearchView();
@@ -91,57 +80,36 @@ public class ModifyTreeTransaction extends Transaction {
 
     private void treeSelected(String barcode) {
         try {
-            treeToModify = new Tree(barcode);
-            createAndShowModifyTreeView();
+            treeToRemove = new Tree(barcode);
+            createAndShowRemoveTreeView();
         } catch (InvalidPrimaryKeyException e) {
             transactionErrorMessage = "ERROR: Tree with barcode " + barcode + " not found.";
             myRegistry.updateSubscribers("TransactionStatusMessage", this);
         }
     }
 
-    private void processModification(Properties props) {
+    private void processRemoval() {
         try {
-            String barcode = (String)treeToModify.getState("Barcode");
+            String barcode = (String)treeToRemove.getState("Barcode");
+            String treeType = (String)treeToRemove.getState("TreeType");
 
-            Properties dbFieldProps = new Properties();
-            dbFieldProps.setProperty("Barcode", barcode);
+            treeToRemove.setInactive();
 
-            if (props.getProperty("treeType") != null)
-                dbFieldProps.setProperty("TreeType", props.getProperty("treeType"));
+            transactionSuccessMessage = "Tree " + barcode + " (Type: " + treeType + ") has been successfully removed!";
+            showSuccessNotification(barcode, treeType);
 
-            if (props.getProperty("notes") != null)
-                dbFieldProps.setProperty("Notes", props.getProperty("notes"));
-
-            if (props.getProperty("status") != null)
-                dbFieldProps.setProperty("Status", props.getProperty("status"));
-
-            String oldStatus = (String)treeToModify.getState("Status");
-            String newStatus = props.getProperty("status");
-            if (newStatus != null && !newStatus.equals(oldStatus)) {
-                String today = new SimpleDateFormat("MM-dd-yyyy").format(new Date());
-                dbFieldProps.setProperty("DateStatusUpdated", today);
-            } else if (props.getProperty("dateStatusUpdated") != null) {
-                dbFieldProps.setProperty("DateStatusUpdated", props.getProperty("dateStatusUpdated"));
-            }
-
-            Tree updatedTree = new Tree(dbFieldProps);
-            updatedTree.save();
-
-            transactionSuccessMessage = "Tree " + barcode + " has been successfully updated!";
-            showSuccessNotification(barcode);
-
-        } catch (Exception e) {
-            transactionErrorMessage = "ERROR: Error updating tree: " + e.getMessage();
+        } catch (SQLException e) {
+            transactionErrorMessage = "ERROR: Database error while removing tree: " + e.getMessage();
             myRegistry.updateSubscribers("TransactionStatusMessage", this);
         }
     }
 
-    private void showSuccessNotification(String barcode) {
+    private void showSuccessNotification(String barcode, String treeType) {
         Platform.runLater(() -> {
             Alert alert = new Alert(AlertType.INFORMATION);
-            alert.setTitle("Update Successful");
-            alert.setHeaderText("Tree Updated Successfully");
-            alert.setContentText("Tree " + barcode + " has been successfully updated!");
+            alert.setTitle("Removal Successful");
+            alert.setHeaderText("Tree Removed Successfully");
+            alert.setContentText("Tree " + barcode + " (Type: " + treeType + ") has been successfully removed from the database.");
 
             ButtonType doneButton = new ButtonType("Done");
             alert.getButtonTypes().setAll(doneButton);
@@ -179,20 +147,20 @@ public class ModifyTreeTransaction extends Transaction {
         swapToView(currentScene);
     }
 
-    private void createAndShowModifyTreeView() {
-        Scene currentScene = myViews.get("ModifyTreeView");
+    private void createAndShowRemoveTreeView() {
+        Scene currentScene = myViews.get("RemoveTreeView");
 
         if (currentScene == null) {
             Properties treeProps = new Properties();
-            treeProps.setProperty("barcode", (String)treeToModify.getState("Barcode"));
-            treeProps.setProperty("treeType", (String)treeToModify.getState("TreeType"));
-            treeProps.setProperty("notes", (String)treeToModify.getState("Notes"));
-            treeProps.setProperty("status", (String)treeToModify.getState("Status"));
-            treeProps.setProperty("dateStatusUpdated", (String)treeToModify.getState("DateStatusUpdated"));
+            treeProps.setProperty("barcode", (String)treeToRemove.getState("Barcode"));
+            treeProps.setProperty("treeType", (String)treeToRemove.getState("TreeType"));
+            treeProps.setProperty("notes", (String)treeToRemove.getState("Notes"));
+            treeProps.setProperty("status", (String)treeToRemove.getState("Status"));
+            treeProps.setProperty("dateStatusUpdated", (String)treeToRemove.getState("DateStatusUpdated"));
 
-            View newView = new userinterface.ModifyTreeView(this, treeProps);
+            View newView = new userinterface.RemoveTreeView(this, treeProps);
             currentScene = new Scene(newView);
-            myViews.put("ModifyTreeView", currentScene);
+            myViews.put("RemoveTreeView", currentScene);
         }
 
         swapToView(currentScene);
@@ -211,8 +179,8 @@ public class ModifyTreeTransaction extends Transaction {
             return "";
         } else if (key.equals("TreeList")) {
             return treeCollection;
-        } else if (key.equals("Tree") && treeToModify != null) {
-            return treeToModify;
+        } else if (key.equals("Tree") && treeToRemove != null) {
+            return treeToRemove;
         } else if (key.equals("Trees") && treeCollection != null) {
             return treeCollection.getState("Trees");
         }
