@@ -35,6 +35,17 @@ A Tree Sales Management System developed as part of CSC 427/429: Software System
    ```
    Note: Replace "path/to/javafx/lib" with your actual JavaFX lib directory path
 
+## 4. Database Configuration
+1. Create a dbConfig.ini file in the project root directory
+2. Populate with the following configurations
+
+   ```
+      username=DB_USERNAME
+      password=DB_PASSWORD
+      dbName=DB_NAME
+      server=DB_SERVER
+   ```
+
 ## Running the Application
 After completing the setup, you can run the application using the green "Run" button in IntelliJ IDEA.
 
