@@ -1,4 +1,4 @@
-package userinterface;
+package userinterface.TreeViews;
 
 import impresario.IModel;
 import javafx.geometry.Insets;
@@ -10,11 +10,11 @@ import javafx.scene.layout.*;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
-import model.TreeType;
-import model.TreeTypeCollection;
+import model.TreeTypeModels.TreeType;
+import model.TreeTypeModels.TreeTypeCollection;
+import userinterface.MessageView;
+import userinterface.View;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.Properties;
 import java.util.Vector;
 

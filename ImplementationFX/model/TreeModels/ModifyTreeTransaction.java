@@ -1,4 +1,4 @@
-package model;
+package model.TreeModels;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -15,12 +15,11 @@ import javafx.scene.control.Alert.AlertType;
 import javafx.stage.Stage;
 
 import event.Event;
-import impresario.IModel;
-import impresario.IView;
-import userinterface.MainStageContainer;
+import model.Transaction;
+import model.TreeTypeModels.TreeType;
+import userinterface.TreeViews.ModifyTreeView;
 import userinterface.View;
 import userinterface.ViewFactory;
-import userinterface.WindowPosition;
 
 public class ModifyTreeTransaction extends Transaction {
 
@@ -202,7 +201,7 @@ public class ModifyTreeTransaction extends Transaction {
             treeProps.setProperty("Status", (String) treeToModify.getState("Status"));
             treeProps.setProperty("DateStatusUpdated", (String) treeToModify.getState("DateStatusUpdated"));
 
-            View newView = new userinterface.ModifyTreeView(this, treeProps);
+            View newView = new ModifyTreeView(this, treeProps);
             currentScene = new Scene(newView);
             myViews.put("ModifyTreeView", currentScene);
         }

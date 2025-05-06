@@ -1,4 +1,4 @@
-package model;
+package model.TreeModels;
 
 import java.util.Hashtable;
 import java.util.Properties;
@@ -11,23 +11,23 @@ import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.ButtonType;
 import javafx.stage.Stage;
 
-import impresario.IModel;
 import impresario.IView;
 import event.Event;
-import jdk.jfr.BooleanFlag;
+import model.Transaction;
 import userinterface.MainStageContainer;
 import userinterface.View;
 import userinterface.ViewFactory;
 import userinterface.WindowPosition;
 
-public class AddTreeTypeTransaction extends Transaction{
+public class AddTreeTransaction extends Transaction {
+
     private Properties dependencies;
     private Hashtable<String, Scene> myViews;
     private Stage myStage;
     private String transactionErrorMessage = "";
     private String transactionSuccessMessage = "";
 
-    public AddTreeTypeTransaction(){
+    public AddTreeTransaction() {
         super();
         myViews = new Hashtable<>();
         myStage = MainStageContainer.getInstance();
@@ -43,9 +43,9 @@ public class AddTreeTypeTransaction extends Transaction{
 
     @Override
     protected Scene createView() {
-        View newView = ViewFactory.createView("AddTreeTypeView", this);
+        View newView = ViewFactory.createView("AddTreeView", this);
         Scene currentScene = new Scene(newView);
-        myViews.put("AddTreeTypeView", currentScene);
+        myViews.put("AddTreeView", currentScene);
         return currentScene;
     }
 
@@ -55,7 +55,7 @@ public class AddTreeTypeTransaction extends Transaction{
             doYourJob();
         } else if ("CancelTransaction".equals(key)) {
             myRegistry.updateSubscribers("CancelTransaction", this);
-        } else if ("AddTreeTypeTransaction".equals(key)) {
+        } else if ("AddTree".equals(key)) {
             processTransaction((Properties) value);
         }
     }
@@ -66,32 +66,33 @@ public class AddTreeTypeTransaction extends Transaction{
         swapToView(newScene);
     }
 
-    protected void processTransaction(Properties treeTypeData) {
+    protected void processTransaction(Properties treeData) {
         try {
             Properties dbProps = new Properties();
+            dbProps.setProperty("Barcode", treeData.getProperty("Barcode"));
+            dbProps.setProperty("TreeType", treeData.getProperty("TreeType"));
+            dbProps.setProperty("Notes", treeData.getProperty("Notes"));
+            dbProps.setProperty("Status", "Available");
+            dbProps.setProperty("DateStatusUpdated", treeData.getProperty("DateStatusUpdated"));
 
-            dbProps.setProperty("ID", treeTypeData.getProperty("ID"));
-            dbProps.setProperty("TypeDescription", treeTypeData.getProperty("TypeDescription"));
-            dbProps.setProperty("Cost", treeTypeData.getProperty("Cost"));
-            dbProps.setProperty("BarcodePrefix", treeTypeData.getProperty("BarcodePrefix"));
-            TreeType newTreeType = new TreeType(dbProps);
-            newTreeType.save();
+            Tree newTree = new Tree(dbProps);
+            newTree.save();
 
-            transactionSuccessMessage = "Tree Type" + dbProps.getProperty("ID") + " has been successfully added!";
-            showSuccessNotification(dbProps.getProperty("ID"));
+            transactionSuccessMessage = "Tree " + dbProps.getProperty("Barcode") + " has been successfully added!";
+            showSuccessNotification(dbProps.getProperty("Barcode"));
 
         } catch (Exception e) {
-            transactionErrorMessage = "ERROR: Failed to add tree type - " + e.getMessage();
+            transactionErrorMessage = "ERROR: Failed to add tree - " + e.getMessage();
             myRegistry.updateSubscribers("TransactionStatusMessage", this);
         }
     }
 
-    private void showSuccessNotification(String id) {
+    private void showSuccessNotification(String barcode) {
         Platform.runLater(() -> {
             Alert alert = new Alert(AlertType.INFORMATION);
-            alert.setTitle("Tree Type Added");
-            alert.setHeaderText("Tree Type Added Successfully");
-            alert.setContentText("Tree Type " + id + " has been successfully added to the database.");
+            alert.setTitle("Tree Added");
+            alert.setHeaderText("Tree Added Successfully");
+            alert.setContentText("Tree " + barcode + " has been successfully added to the database.");
 
             ButtonType doneButton = new ButtonType("Done");
             alert.getButtonTypes().setAll(doneButton);
@@ -107,7 +108,7 @@ public class AddTreeTypeTransaction extends Transaction{
 
     public void swapToView(Scene newScene) {
         if (newScene == null) {
-            System.out.println("AddTreeTypeTransaction.swapToView(): Missing view for display");
+            System.out.println("AddTreeTransaction.swapToView(): Missing view for display");
             new Event(Event.getLeafLevelClassName(this), "swapToView",
                     "Missing view for display ", Event.ERROR);
             return;

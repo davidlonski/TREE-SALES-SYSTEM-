@@ -1,4 +1,4 @@
-package userinterface;
+package userinterface.ScoutViews;
 
 import impresario.IModel;
 import javafx.collections.*;
@@ -12,10 +12,10 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
 import javafx.scene.text.*;
-import model.Scout;
-import model.ScoutCollection;
+import model.ScoutModels.*;
+import userinterface.MessageView;
+import userinterface.View;
 
-import java.util.Enumeration;
 import java.util.Vector;
 
 public class ScoutCollectionView extends View {

@@ -1,52 +1,43 @@
 package userinterface;
 
 import impresario.IModel;
+import userinterface.ScoutViews.*;
+import userinterface.TreeViews.*;
+import userinterface.TreeTypeViews.*;
 
 public class ViewFactory {
 
 	public static View createView(String viewName, IModel model) {
 
-		if (viewName.equals("TransactionChoiceView")) {
-			return new TransactionChoiceView(model);
-		}
-		else if (viewName.equals("ScoutView")) {
-			return new ScoutView(model);
-		}
-		else if (viewName.equals("AddScoutView")) {
-			return new AddScoutView(model);
-		}
-		else if (viewName.equals("AddTreeView")) {
-			return new AddTreeView(model);
-		}
-		else if (viewName.equals("AddTreeTypeView")) {
-			return new AddTreeTypeView(model);
-		}
-		else if (viewName.equals("ModifyScoutView")) {
-			return new ModifyScoutView(model, null);
-		}
-		else if (viewName.equals("RemoveScoutView")) {
-			return new RemoveScoutView(model, null);
-		}
-		else if (viewName.equals("ScoutCollectionView")) {
-			return new ScoutCollectionView(model, null);
-		}
-		else if (viewName.equals("ScoutSearchView")) {
-			return new ScoutSearchView(model); // This is the search view we want to show before displaying the ScoutCollectionView.
-		}
-		else if (viewName.equals("TreeSearchView")) {
-			return new TreeSearchView(model);
-		}
-		else if (viewName.equals("TreeCollectionView")) {
-			return new TreeCollectionView(model, null);
-		}
-		else if (viewName.equals("ModifyTreeView")) {
-			return new ModifyTreeView(model, null);
-		}
-		else if (viewName.equals("RemoveTreeView")) {
-			return new RemoveTreeView(model, null);
-		}
-		else {
-			return null;
-		}
+		View view = null;
+
+		if (viewName.equals("TransactionChoiceView")) 		
+			view = new TransactionChoiceView(model);
+		else if (viewName.equals("AddScoutView")) 
+			view = new AddScoutView(model);
+		else if (viewName.equals("AddTreeView")) 
+			view = new AddTreeView(model);
+		else if (viewName.equals("AddTreeTypeView")) 
+			view = new AddTreeTypeView(model);
+		else if (viewName.equals("ModifyScoutView")) 
+			view = new ModifyScoutView(model, null);
+		else if (viewName.equals("RemoveScoutView")) 
+			view = new RemoveScoutView(model, null);
+		else if (viewName.equals("ScoutCollectionView")) 
+			view = new ScoutCollectionView(model, null);
+		else if (viewName.equals("ScoutSearchView")) 
+			view = new ScoutSearchView(model);
+		else if (viewName.equals("TreeSearchView")) 
+			view = new TreeSearchView(model);
+		else if (viewName.equals("TreeCollectionView")) 
+			view = new TreeCollectionView(model, null);
+		else if (viewName.equals("ModifyTreeView")) 
+			view = new ModifyTreeView(model, null);
+		else if (viewName.equals("RemoveTreeView")) 
+			view = new RemoveTreeView(model, null);
+		else 
+			throw new IllegalArgumentException("Invalid view name: " + viewName);
+
+		return view;
 	}
 }

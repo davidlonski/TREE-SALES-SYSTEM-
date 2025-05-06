@@ -1,4 +1,4 @@
-package userinterface;
+package userinterface.ScoutViews;
 
 import javafx.beans.property.SimpleStringProperty;
 import java.util.Vector;

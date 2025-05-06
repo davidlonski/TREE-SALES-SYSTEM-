@@ -1,4 +1,4 @@
-package model;
+package model.ScoutModels;
 
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
@@ -11,6 +11,8 @@ import java.util.Optional;
 
 import event.Event;
 import exception.InvalidPrimaryKeyException;
+import model.Transaction;
+import userinterface.ScoutViews.RemoveScoutView;
 import userinterface.View;
 import userinterface.ViewFactory;
 
@@ -212,7 +214,7 @@ public class RemoveScoutTransaction extends Transaction {
             scoutProps.setProperty("troopID", (String)scoutToRemove.getState("TroopID"));
             scoutProps.setProperty("status", (String)scoutToRemove.getState("Status"));
 
-            View newView = new userinterface.RemoveScoutView(this, scoutProps);
+            View newView = new RemoveScoutView(this, scoutProps);
             currentScene = new Scene(newView);
             myViews.put("RemoveScoutView", currentScene);
         }

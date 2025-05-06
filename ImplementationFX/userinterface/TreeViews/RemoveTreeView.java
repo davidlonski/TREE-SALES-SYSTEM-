@@ -1,4 +1,4 @@
-package userinterface;
+package userinterface.TreeViews;
 
 import impresario.IModel;
 import javafx.geometry.Insets;
@@ -9,20 +9,22 @@ import javafx.scene.layout.*;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
+import userinterface.MessageView;
+import userinterface.View;
 
 import java.util.Properties;
 
-public class RemoveScoutView extends View {
+public class RemoveTreeView extends View {
 
-    private Label scoutInfoLabel;
+    private Label treeInfoLabel;
     private Button confirmButton, cancelButton;
     private MessageView statusLog;
 
-    private final Properties scoutProps;
+    private final Properties treeProps;
 
-    public RemoveScoutView(IModel model, Properties props) {
-        super(model, "RemoveScoutView");
-        this.scoutProps = props;
+    public RemoveTreeView(IModel model, Properties props) {
+        super(model, "RemoveTreeView");
+        this.treeProps = props;
 
         VBox container = new VBox(10);
         container.setPadding(new Insets(20));
@@ -32,7 +34,7 @@ public class RemoveScoutView extends View {
     }
 
     private Node createTitle() {
-        Text titleText = new Text("Remove Scout");
+        Text titleText = new Text("Remove Tree");
         titleText.setFont(Font.font("Arial", FontWeight.BOLD, 20));
         return titleText;
     }
@@ -40,35 +42,33 @@ public class RemoveScoutView extends View {
     private Node createFormContent() {
         VBox box = new VBox(10);
 
-        scoutInfoLabel = new Label(formatScoutInfo());
-        scoutInfoLabel.setWrapText(true);
-        scoutInfoLabel.setStyle("-fx-border-color: gray; -fx-padding: 10; -fx-background-color: #f9f9f9;");
+        treeInfoLabel = new Label(formatTreeInfo());
+        treeInfoLabel.setWrapText(true);
+        treeInfoLabel.setStyle("-fx-border-color: gray; -fx-padding: 10; -fx-background-color: #f9f9f9;");
 
         confirmButton = new Button("Confirm Removal");
         confirmButton.setStyle("-fx-background-color: red; -fx-text-fill: white;");
-        confirmButton.setOnAction(e -> myModel.stateChangeRequest("RemoveScout", null));
+        confirmButton.setOnAction(e -> myModel.stateChangeRequest("RemoveTree", null));
 
         cancelButton = new Button("Cancel");
         cancelButton.setOnAction(e -> myModel.stateChangeRequest("CancelRemoval", null));
 
         box.getChildren().addAll(
-                new Label("Are you sure you want to remove this scout?"),
-                scoutInfoLabel,
+                new Label("Are you sure you want to remove this tree?"),
+                treeInfoLabel,
                 new HBox(10, confirmButton, cancelButton)
         );
 
         return box;
     }
 
-    private String formatScoutInfo() {
-        return String.format("Scout ID: %s\nName: %s %s\nDOB: %s\nPhone: %s\nEmail: %s\nTroop ID: %s",
-                scoutProps.getProperty("scoutID"),
-                scoutProps.getProperty("firstName"),
-                scoutProps.getProperty("lastName"),
-                scoutProps.getProperty("dateOfBirth"),
-                scoutProps.getProperty("phoneNumber"),
-                scoutProps.getProperty("email"),
-                scoutProps.getProperty("troopID")
+    private String formatTreeInfo() {
+        return String.format("Barcode: %s\nTree Type: %s\nNotes: %s\nStatus: %s\nStatus Updated: %s",
+                treeProps.getProperty("barcode"),
+                treeProps.getProperty("treeType"),
+                treeProps.getProperty("notes"),
+                treeProps.getProperty("status"),
+                treeProps.getProperty("dateStatusUpdated")
         );
     }
 

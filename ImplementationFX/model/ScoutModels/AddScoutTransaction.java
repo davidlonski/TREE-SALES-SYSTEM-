@@ -1,4 +1,4 @@
-package model;
+package model.ScoutModels;
 
 import java.util.Properties;
 import java.util.Optional;
@@ -10,6 +10,7 @@ import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.ButtonType;
 
 // project imports
+import model.Transaction;
 import userinterface.View;
 import userinterface.ViewFactory;
 

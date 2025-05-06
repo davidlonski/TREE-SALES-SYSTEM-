@@ -1,4 +1,4 @@
-package model;
+package model.ScoutModels;
 
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
@@ -6,13 +6,14 @@ import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.ButtonType;
 import javafx.application.Platform;
 import java.util.Properties;
-import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Optional;
 
 import event.Event;
 import exception.InvalidPrimaryKeyException;
+import model.Transaction;
+import userinterface.ScoutViews.ModifyScoutView;
 import userinterface.View;
 import userinterface.ViewFactory;
 
@@ -273,7 +274,7 @@ public class ModifyScoutTransaction extends Transaction {
             scoutProps.setProperty("status", (String)scoutToModify.getState("Status"));
             scoutProps.setProperty("datestatus", (String)scoutToModify.getState("DateStatusUpdated"));
 
-            View newView = new userinterface.ModifyScoutView(this, scoutProps);
+            View newView = new ModifyScoutView(this, scoutProps);
             currentScene = new Scene(newView);
             myViews.put("ModifyScoutView", currentScene);
         }

@@ -1,4 +1,4 @@
-package userinterface;
+package userinterface.TreeViews;
 
 import impresario.IModel;
 import javafx.collections.*;
@@ -12,10 +12,11 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
 import javafx.scene.text.*;
-import model.Tree;
-import model.TreeCollection;
+import model.TreeModels.Tree;
+import model.TreeModels.TreeCollection;
+import userinterface.MessageView;
+import userinterface.View;
 
-import java.util.Enumeration;
 import java.util.Vector;
 
 public class TreeCollectionView extends View {

@@ -1,10 +1,8 @@
-package model;
+package model.TreeModels;
 
-import database.*;
 import exception.*;
 import impresario.*;
-import common.*;
-import event.*;
+import model.EntityBase;
 
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;

@@ -2,8 +2,9 @@
 package model;
 
 // system imports
-import java.util.Vector;
-import javax.swing.JFrame;
+import model.ScoutModels.*;
+import model.TreeModels.*;
+import model.TreeTypeModels.*;
 
 // project imports
 
@@ -21,37 +22,21 @@ public class TransactionFactory
 		Transaction retValue = null;
 
 		if (transType.equals("AddScoutTransaction"))
-		{
 			retValue = new AddScoutTransaction();
-		}
 		else if (transType.equals("ModifyScoutTransaction"))
-		{
 			retValue = new ModifyScoutTransaction();
-		}
 		else if (transType.equals("RemoveScoutTransaction"))
-		{
 			retValue = new RemoveScoutTransaction();
-		}
 		else if (transType.equals("AddTreeTransaction"))
-		{
 			retValue = new AddTreeTransaction();
-		}
 		else if (transType.equals("AddTreeTypeTransaction"))
-		{
 			retValue = new AddTreeTypeTransaction();
-		}
 		else if (transType.equals("ModifyTreeTransaction"))
-		{
 			retValue = new ModifyTreeTransaction();
-		}
 		else if (transType.equals("RemoveTreeTransaction"))
-		{
 			retValue = new RemoveTreeTransaction();
-		}
-		else if (transType.equals("AddTreeTypeTransaction"))
-		{
-			//retValue = new AddTreeTypeTransaction();
-		}
+		else
+			throw new Exception("Invalid transaction type: " + transType);
 
 		return retValue;
 	}

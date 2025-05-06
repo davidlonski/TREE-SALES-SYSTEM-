@@ -1,9 +1,8 @@
-package model;
+package model.TreeTypeModels;
 
-import database.Persistable;
 import impresario.IModel;
 import impresario.IView;
-import event.Event;
+import model.EntityBase;
 
 import java.util.Vector;
 import java.util.Properties;

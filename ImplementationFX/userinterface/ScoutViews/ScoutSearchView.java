@@ -1,4 +1,4 @@
-package userinterface;
+package userinterface.ScoutViews;
 
 import impresario.IModel;
 import javafx.geometry.Insets;
@@ -8,8 +8,8 @@ import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import javafx.scene.text.*;
 import javafx.event.ActionEvent;
-
-import java.util.Properties;
+import userinterface.MessageView;
+import userinterface.View;
 
 public class ScoutSearchView extends View {
 

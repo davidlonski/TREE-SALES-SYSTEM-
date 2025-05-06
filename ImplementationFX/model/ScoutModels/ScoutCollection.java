@@ -1,8 +1,9 @@
-package model;
+package model.ScoutModels;
 
-import database.*;
 import exception.*;
 import impresario.*;
+import model.EntityBase;
+
 import java.util.Properties;
 import java.util.Vector;
 

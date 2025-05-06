@@ -1,4 +1,4 @@
-package model;
+package model.TreeModels;
 
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
@@ -11,6 +11,8 @@ import java.util.Optional;
 
 import event.Event;
 import exception.InvalidPrimaryKeyException;
+import model.Transaction;
+import userinterface.TreeViews.RemoveTreeView;
 import userinterface.View;
 import userinterface.ViewFactory;
 
@@ -158,7 +160,7 @@ public class RemoveTreeTransaction extends Transaction {
             treeProps.setProperty("status", (String)treeToRemove.getState("Status"));
             treeProps.setProperty("dateStatusUpdated", (String)treeToRemove.getState("DateStatusUpdated"));
 
-            View newView = new userinterface.RemoveTreeView(this, treeProps);
+            View newView = new RemoveTreeView(this, treeProps);
             currentScene = new Scene(newView);
             myViews.put("RemoveTreeView", currentScene);
         }

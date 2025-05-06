@@ -1,4 +1,4 @@
-package userinterface;
+package userinterface.ScoutViews;
 
 import impresario.IModel;
 import javafx.event.*;
@@ -11,6 +11,8 @@ import javafx.scene.layout.*;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
+import userinterface.MessageView;
+import userinterface.View;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;

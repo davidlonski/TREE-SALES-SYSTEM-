@@ -1,10 +1,9 @@
-package model;
+package model.TreeTypeModels;
 
-import database.*;
-import event.Event;
 import exception.InvalidPrimaryKeyException;
 import impresario.IModel;
 import impresario.IView;
+import model.EntityBase;
 
 import java.sql.SQLException;
 import java.util.Enumeration;
