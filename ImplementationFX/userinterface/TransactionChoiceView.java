@@ -28,17 +28,16 @@ import impresario.IModel;
 
 public class TransactionChoiceView extends View {
 
-
     private Button addScoutTransactionButton;
     private Button modifyScoutTransactionButton;
     private Button removeScoutTransactionButton;
     private Button addTreeTransactionButton;
-
-
-
+    private Button modifyTreeTransactionButton;
+    private Button removeTreeTransactionButton;
+    private Button addTreeTypeTransactionButton;
+    private Button modifyTreeTypeTransactionButton;
 
     private Button closeTransactionButton;
-
 
     private MessageView statusLog;
 
@@ -63,13 +62,10 @@ public class TransactionChoiceView extends View {
     //-------------------------------------------------------------
     private Node createTitle()
     {
-
         Text titleText = new Text("       Transaction Choice          ");
         titleText.setFont(Font.font("Arial", FontWeight.BOLD, 20));
         titleText.setTextAlignment(TextAlignment.CENTER);
         titleText.setFill(Color.DARKGREEN);
-
-
         return titleText;
     }
 
@@ -84,7 +80,7 @@ public class TransactionChoiceView extends View {
         VBox buttonBox = new VBox(10);  // 10 is the spacing between buttons
         buttonBox.setAlignment(Pos.CENTER);
 
-        addScoutTransactionButton = new Button("Add Scout Transaction");
+        addScoutTransactionButton = new Button("Add A Scout");
         addScoutTransactionButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
@@ -93,16 +89,17 @@ public class TransactionChoiceView extends View {
         });
         addScoutTransactionButton.setPrefWidth(150);
 
-        modifyScoutTransactionButton = new Button("Modify Scout Transaction");
+        modifyScoutTransactionButton = new Button("Modify A Scout");
         modifyScoutTransactionButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
-                processAction(event);
+                clearErrorMessage();
+                myModel.stateChangeRequest("ModifyScoutTransaction", null);
             }
         });
         modifyScoutTransactionButton.setPrefWidth(150);
 
-        removeScoutTransactionButton = new Button("Remove Scout Transaction");
+        removeScoutTransactionButton = new Button("Remove A Scout");
         removeScoutTransactionButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
@@ -111,14 +108,51 @@ public class TransactionChoiceView extends View {
         });
         removeScoutTransactionButton.setPrefWidth(150);
 
-        addTreeTransactionButton = new Button("Add Tree Transaction");
+        addTreeTransactionButton = new Button("Add A Tree");
         addTreeTransactionButton.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                myModel.stateChangeRequest("AddTreeTransaction", null);
+            }
+        });
+        addTreeTransactionButton.setPrefWidth(150);
+
+
+        modifyTreeTransactionButton = new Button("Modify A Tree");
+        modifyTreeTransactionButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
                 processAction(event);
             }
         });
-        addTreeTransactionButton.setPrefWidth(150);
+        modifyTreeTransactionButton.setPrefWidth(150);
+
+        removeTreeTransactionButton = new Button("Remove A Tree");
+        removeTreeTransactionButton.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                processAction(event);
+            }
+        });
+        removeTreeTransactionButton.setPrefWidth(150);
+
+        addTreeTypeTransactionButton = new Button("Add A Tree Type");
+        addTreeTypeTransactionButton.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                processAction(event);
+            }
+        });
+        addTreeTypeTransactionButton.setPrefWidth(150);
+
+        modifyTreeTypeTransactionButton = new Button("Modify A Tree Type");
+        modifyTreeTypeTransactionButton.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                processAction(event);
+            }
+        });
+        modifyTreeTypeTransactionButton.setPrefWidth(150);
 
         closeTransactionButton = new Button("Close");
         closeTransactionButton.setOnAction(new EventHandler<ActionEvent>() {
@@ -139,6 +173,10 @@ public class TransactionChoiceView extends View {
                 modifyScoutTransactionButton,
                 removeScoutTransactionButton,
                 addTreeTransactionButton,
+                modifyTreeTransactionButton,
+                removeTreeTransactionButton,
+                addTreeTypeTransactionButton,
+                modifyTreeTypeTransactionButton,
                 closeTransactionButton
         );
 
@@ -158,30 +196,37 @@ public class TransactionChoiceView extends View {
         // No fields to populate for this view
     }
 
-    public void processAction(Event evt){
-        if (evt.getSource() == addScoutTransactionButton){
+    public void processAction(Event evt) {
+        if (evt.getSource() == addScoutTransactionButton)
             myModel.stateChangeRequest("AddScoutTransaction", null);
-        }else if(evt.getSource() == modifyScoutTransactionButton){
+        else if (evt.getSource() == modifyScoutTransactionButton)
             myModel.stateChangeRequest("ModifyScoutTransaction", null);
-        }else if(evt.getSource() == removeScoutTransactionButton){
+        else if (evt.getSource() == removeScoutTransactionButton)
             myModel.stateChangeRequest("RemoveScoutTransaction", null);
-        }else if(evt.getSource() == addTreeTransactionButton){
+        else if (evt.getSource() == addTreeTransactionButton)
             myModel.stateChangeRequest("AddTreeTransaction", null);
-        }else if(evt.getSource() == closeTransactionButton){
+        else if (evt.getSource() == modifyTreeTransactionButton)
+            myModel.stateChangeRequest("ModifyTreeTransaction", null);
+        else if (evt.getSource() == removeTreeTransactionButton)
+            myModel.stateChangeRequest("RemoveTreeTransaction", null);
+        else if (evt.getSource() == addTreeTypeTransactionButton)
+            myModel.stateChangeRequest("AddTreeTypeTransaction", null);
+        else if (evt.getSource() == modifyTreeTypeTransactionButton)
+            myModel.stateChangeRequest("ModifyTreeTypeTransaction", null);
+        else if (evt.getSource() == closeTransactionButton) {
             myModel.stateChangeRequest("Done", null);
         }
-
     }
 
     @Override
     public void updateState(String key, Object value) {
-        if (key.equals("addScoutTransactionError")==true){
+        if (key.equals("addScoutTransactionError")){
             displayErrorMessage((String)value);
-        }else if(key.equals("modifyScoutTransactionError")==true){
+        } else if(key.equals("modifyScoutTransactionError")){
             displayErrorMessage((String)value);
-        }else if(key.equals("removeScoutTransactionError")==true){
+        } else if(key.equals("removeScoutTransactionError")){
             displayErrorMessage((String)value);
-        }else if(key.equals("addTreeTransactionError")==true){
+        } else if(key.equals("addTreeTransactionError")){
             displayErrorMessage((String)value);
         }
     }
