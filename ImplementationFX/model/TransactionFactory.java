@@ -35,6 +35,8 @@ public class TransactionFactory
 			retValue = new ModifyTreeTransaction();
 		else if (transType.equals("RemoveTreeTransaction"))
 			retValue = new RemoveTreeTransaction();
+		else if (transType.equals("ModifyTreeTypeTransaction"))
+			retValue = new ModifyTreeTypeTransaction();
 		else
 			throw new Exception("Invalid transaction type: " + transType);
 

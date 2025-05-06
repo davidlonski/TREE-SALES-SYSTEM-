@@ -138,6 +138,8 @@ public class RemoveTreeTransaction extends Transaction {
     }
 
     private void createAndShowTreeCollectionView() {
+        myViews.remove("TreeCollectionView");
+
         Scene currentScene = myViews.get("TreeCollectionView");
 
         if (currentScene == null) {

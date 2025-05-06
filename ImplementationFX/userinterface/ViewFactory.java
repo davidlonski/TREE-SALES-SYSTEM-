@@ -35,7 +35,13 @@ public class ViewFactory {
 			view = new ModifyTreeView(model, null);
 		else if (viewName.equals("RemoveTreeView")) 
 			view = new RemoveTreeView(model, null);
-		else 
+		else if (viewName.equals("ModifyTreeTypeView"))
+			view = new ModifyTreeTypeView(model, null);
+		else if (viewName.equals("TreeTypeSearchView"))
+			view = new TreeTypeSearchView(model);
+		else if (viewName.equals("TreeTypeCollectionView"))
+			view = new TreeTypeCollectionView(model);
+		else
 			throw new IllegalArgumentException("Invalid view name: " + viewName);
 
 		return view;

@@ -35,6 +35,7 @@ public class TransactionChoiceView extends View {
     private Button modifyTreeTransactionButton;
     private Button removeTreeTransactionButton;
     private Button addTreeTypeTransactionButton;
+    private Button modifyTreeTypeTransactionButton;
 
     private Button closeTransactionButton;
 
@@ -144,6 +145,15 @@ public class TransactionChoiceView extends View {
         });
         addTreeTypeTransactionButton.setPrefWidth(150);
 
+        modifyTreeTypeTransactionButton = new Button("Modify A Tree Type");
+        modifyTreeTypeTransactionButton.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                processAction(event);
+            }
+        });
+        modifyTreeTypeTransactionButton.setPrefWidth(150);
+
         closeTransactionButton = new Button("Close");
         closeTransactionButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override
@@ -166,6 +176,7 @@ public class TransactionChoiceView extends View {
                 modifyTreeTransactionButton,
                 removeTreeTransactionButton,
                 addTreeTypeTransactionButton,
+                modifyTreeTypeTransactionButton,
                 closeTransactionButton
         );
 
@@ -185,24 +196,24 @@ public class TransactionChoiceView extends View {
         // No fields to populate for this view
     }
 
-    public void processAction(Event evt){
-        if (evt.getSource() == addScoutTransactionButton){
+    public void processAction(Event evt) {
+        if (evt.getSource() == addScoutTransactionButton)
             myModel.stateChangeRequest("AddScoutTransaction", null);
-        } else if(evt.getSource() == modifyScoutTransactionButton){
-            // Navigate to ScoutSearchView
-            myModel.stateChangeRequest("ModifyScoutTransaction", null); // Trigger ScoutSearchView
-        } else if(evt.getSource() == removeScoutTransactionButton){
-            // Navigate to ScoutSearchView
-            myModel.stateChangeRequest("RemoveScoutTransaction", null); // Trigger ScoutSearchView
-        } else if(evt.getSource() == addTreeTransactionButton){
+        else if (evt.getSource() == modifyScoutTransactionButton)
+            myModel.stateChangeRequest("ModifyScoutTransaction", null);
+        else if (evt.getSource() == removeScoutTransactionButton)
+            myModel.stateChangeRequest("RemoveScoutTransaction", null);
+        else if (evt.getSource() == addTreeTransactionButton)
             myModel.stateChangeRequest("AddTreeTransaction", null);
-        } else if(evt.getSource() == modifyTreeTransactionButton){
+        else if (evt.getSource() == modifyTreeTransactionButton)
             myModel.stateChangeRequest("ModifyTreeTransaction", null);
-        } else if(evt.getSource() == removeTreeTransactionButton){
+        else if (evt.getSource() == removeTreeTransactionButton)
             myModel.stateChangeRequest("RemoveTreeTransaction", null);
-        } else if(evt.getSource() == addTreeTypeTransactionButton){
+        else if (evt.getSource() == addTreeTypeTransactionButton)
             myModel.stateChangeRequest("AddTreeTypeTransaction", null);
-        } else if(evt.getSource() == closeTransactionButton){
+        else if (evt.getSource() == modifyTreeTypeTransactionButton)
+            myModel.stateChangeRequest("ModifyTreeTypeTransaction", null);
+        else if (evt.getSource() == closeTransactionButton) {
             myModel.stateChangeRequest("Done", null);
         }
     }

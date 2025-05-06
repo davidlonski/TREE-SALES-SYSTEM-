@@ -86,7 +86,8 @@ public class TreeLotCoordinator implements IView, IModel {
                 || key.equals("AddTreeTransaction")
                 || key.equals("ModifyTreeTransaction")
                 || key.equals("RemoveTreeTransaction")
-                || key.equals("AddTreeTypeTransaction")){
+                || key.equals("AddTreeTypeTransaction")
+                || key.equals("ModifyTreeTypeTransaction")){
             doTransaction(key);
         }else if (key.equals("CancelTransaction")){
             createAndShowView("TransactionChoiceView");

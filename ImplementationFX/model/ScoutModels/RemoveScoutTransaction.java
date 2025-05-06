@@ -184,6 +184,8 @@ public class RemoveScoutTransaction extends Transaction {
      * Create and show the scout collection view
      */
     private void createAndShowScoutCollectionView() {
+        myViews.remove("ScoutCollectionView");
+
         Scene currentScene = myViews.get("ScoutCollectionView");
 
         if (currentScene == null) {

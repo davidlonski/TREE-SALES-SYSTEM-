@@ -29,6 +29,37 @@ public class TreeTypeCollection extends EntityBase implements IModel, IView {
         }
     }
 
+
+    public void findByBarcodePrefix(String prefix) {
+        String query = "SELECT * FROM " + myTableName + " WHERE BarcodePrefix = '" + prefix + "'";
+        Vector<Properties> results = getSelectQueryResult(query);
+
+        treeTypes.clear();
+        if (results != null) {
+            for (Properties props : results) {
+                TreeType treeType = new TreeType(props);
+                treeTypes.add(treeType);
+            }
+        }
+    }
+
+    public void findByDescription(String description) {
+        String query = "SELECT * FROM " + myTableName + " WHERE TypeDescription LIKE '%" + description + "%'";
+        Vector<Properties> results = getSelectQueryResult(query);
+
+        treeTypes.clear();
+        if (results != null) {
+            for (Properties props : results) {
+                TreeType treeType = new TreeType(props);
+                treeTypes.add(treeType);
+            }
+        }
+    }
+
+    public boolean hasTreeTypes() {
+        return !treeTypes.isEmpty();
+    }
+
     @Override
     public Object getState(String key) {
         if ("TreeTypes".equals(key)) {
