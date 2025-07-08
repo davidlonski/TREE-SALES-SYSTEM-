@@ -1,0 +1,48 @@
+version: '3.8'
+
+services:
+  database:
+    image: mariadb:10.6
+    container_name: tree-sales-db
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: tree_sales_db
+      MYSQL_USER: treesales
+      MYSQL_PASSWORD: password
+    ports:
+      - "3306:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+      - ./init-db.sql:/docker-entrypoint-initdb.d/init-db.sql:ro
+    networks:
+      - tree-sales-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
+
+  app:
+    build: .
+    container_name: tree-sales-app
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      SPRING_DATASOURCE_URL: jdbc:mariadb://database:3306/tree_sales_db
+      SPRING_DATASOURCE_USERNAME: treesales
+      SPRING_DATASOURCE_PASSWORD: password
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+    depends_on:
+      database:
+        condition: service_healthy
+    networks:
+      - tree-sales-network
+    restart: unless-stopped
+
+volumes:
+  db_data:
+    driver: local
+
+networks:
+  tree-sales-network:
+    driver: bridge
